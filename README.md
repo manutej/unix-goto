@@ -18,6 +18,15 @@ Smart Unix navigation tools powered by Claude AI. Navigate your filesystem using
   - `goto GAI-3101`
   - `goto WA3590`
 
+- **Navigation History**: Automatic tracking and navigation history
+  - `back` → Go to previous directory
+  - `back 3` → Go back 3 directories
+  - `back --list` → Show navigation history
+
+- **Recent Folders**: View and navigate to recently visited locations
+  - `recent` → List 10 most recent folders
+  - `recent --goto 3` → Navigate to 3rd recent folder
+
 - **Special Commands**:
   - `goto ~` → Return to home directory
   - `goto zshrc` → Source and display .zshrc with syntax highlighting
@@ -64,6 +73,19 @@ goto "that GAI project from march"
 goto ~              # Return home
 goto zshrc          # Source and view .zshrc
 goto --help         # Show help
+```
+
+### Navigation History
+```bash
+back                # Go to previous directory
+back 3              # Go back 3 directories
+back --list         # Show navigation history
+back --clear        # Clear navigation history
+
+recent              # Show 10 recent folders
+recent 20           # Show 20 recent folders
+recent --goto 3     # Navigate to 3rd recent folder
+recent --clear      # Clear recent history
 ```
 
 ## Configuration

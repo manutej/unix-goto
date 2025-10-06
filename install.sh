@@ -32,12 +32,27 @@ if grep -q "# Quick project navigation with natural language support" "$SHELL_CO
     echo "✅ goto function already exists in $SHELL_CONFIG"
     echo "   Skipping shell configuration (already installed)"
 else
-    echo "📝 Adding goto function to $SHELL_CONFIG..."
+    echo "📝 Adding unix-goto functions to $SHELL_CONFIG..."
     cat >> "$SHELL_CONFIG" << 'EOF'
 
 # unix-goto - Smart navigation with natural language support
 # Source: https://github.com/manutej/unix-goto
 EOF
+
+    # Add all library functions
+    echo "# History tracking" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/history-tracking.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
+    echo "# Back command" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/back-command.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
+    echo "# Recent command" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/recent-command.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
+    echo "# Main goto function" >> "$SHELL_CONFIG"
     cat "$REPO_DIR/lib/goto-function.sh" >> "$SHELL_CONFIG"
 fi
 

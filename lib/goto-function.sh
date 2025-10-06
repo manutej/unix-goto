@@ -2,6 +2,26 @@
 # unix-goto - Smart project navigation with natural language support
 # https://github.com/manutej/unix-goto
 
+# Helper function to navigate and track history
+__goto_navigate_to() {
+    local target_dir="$1"
+
+    # Push current directory to stack before navigating
+    if command -v __goto_stack_push &> /dev/null; then
+        __goto_stack_push "$PWD"
+    fi
+
+    # Navigate
+    cd "$target_dir"
+
+    # Track in history
+    if command -v __goto_track &> /dev/null; then
+        __goto_track "$PWD"
+    fi
+
+    echo "→ $PWD"
+}
+
 # Quick project navigation with natural language support
 goto() {
     # Handle --help flag
@@ -61,23 +81,19 @@ goto() {
             return
             ;;
         luxor)
-            cd "$HOME/Documents/LUXOR"
-            echo "→ $PWD"
+            __goto_navigate_to "$HOME/Documents/LUXOR"
             return
             ;;
         halcon)
-            cd "$HOME/Documents/LUXOR/PROJECTS/HALCON"
-            echo "→ $PWD"
+            __goto_navigate_to "$HOME/Documents/LUXOR/PROJECTS/HALCON"
             return
             ;;
         docs)
-            cd "$HOME/ASCIIDocs"
-            echo "→ $PWD"
+            __goto_navigate_to "$HOME/ASCIIDocs"
             return
             ;;
         infra)
-            cd "$HOME/ASCIIDocs/infra"
-            echo "→ $PWD"
+            __goto_navigate_to "$HOME/ASCIIDocs/infra"
             return
             ;;
     esac
@@ -95,8 +111,7 @@ goto() {
     for base_path in "${search_paths[@]}"; do
         if [ -d "$base_path/$1" ]; then
             target_dir="$base_path/$1"
-            cd "$target_dir"
-            echo "→ $PWD"
+            __goto_navigate_to "$target_dir"
             return
         fi
     done
