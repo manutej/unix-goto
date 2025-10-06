@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Natural language folder resolver for goto function
+# Usage: goto-resolve "the halcon project"
+
+if [ $# -eq 0 ]; then
+    exit 1
+fi
+
+QUERY="$*"
+
+# Get available folders from key locations
+SEARCH_PATHS=(
+    "$HOME/ASCIIDocs"
+    "$HOME/Documents/LUXOR"
+    "$HOME/Documents/LUXOR/PROJECTS"
+)
+
+FOLDERS=""
+for base_path in "${SEARCH_PATHS[@]}"; do
+    if [ -d "$base_path" ]; then
+        while IFS= read -r dir; do
+            folder_name=$(basename "$dir")
+            FOLDERS="$FOLDERS\n  - $folder_name (in $(dirname "$dir"))"
+        done < <(find "$base_path" -maxdepth 1 -type d -not -name ".*" -not -path "$base_path" 2>/dev/null)
+    fi
+done
+
+# Create system prompt with available folders
+SYSTEM_PROMPT="You are a folder navigation assistant. Based on the user's natural language query, identify the most appropriate folder name from the available folders below.
+
+Available folders:$FOLDERS
+
+Shortcuts:
+  - luxor (Documents/LUXOR root)
+  - halcon (LUXOR/PROJECTS/HALCON)
+  - docs (ASCIIDocs root)
+  - infra (ASCIIDocs/infra)
+
+Rules:
+1. Respond ONLY with the exact folder name, nothing else
+2. Match keywords like 'infrastructure' -> 'infra', 'halcon' -> 'HALCON', project codes like 'GAI-3101' or 'WA3590'
+3. If uncertain, return the closest match
+4. For root directories, use shortcuts: luxor, docs, halcon, infra
+5. NO explanations, NO extra text, JUST the folder name
+
+Example queries and responses:
+- 'the halcon project' -> HALCON
+- 'infrastructure folder' -> infra
+- 'that GAI project from March' -> GAI-3101
+- 'luxor root' -> luxor
+- 'work assignment 3590' -> WA3590"
+
+# Call Claude with the query
+RESPONSE=$(/Users/manu/.claude/local/claude --print --model claude-3-5-sonnet-20241022 --append-system-prompt "$SYSTEM_PROMPT" "$QUERY" 2>/dev/null)
+
+# Extract just the folder name (first line, trimmed)
+FOLDER=$(echo "$RESPONSE" | head -1 | tr -d '[:space:]' | tr -d '"' | tr -d "'")
+
+# Return the folder name
+echo "$FOLDER"
