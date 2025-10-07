@@ -2,6 +2,19 @@
 description: Show current implementation status and roadmap position
 ---
 
+## 🧪 Testing Current Functionality
+
+**BEFORE analyzing project status, remind the user to test if needed:**
+
+If any changes were made since last test run, review TESTING-GUIDE.md and run through:
+- Pre-commit test checklist for affected areas
+- Regression tests to ensure no breakage
+- Document results in test results file
+
+**Testing Guide:** See TESTING-GUIDE.md for comprehensive test scenarios
+
+---
+
 You are reviewing the unix-goto project implementation status. Provide a comprehensive overview of:
 
 ## Current Implementation Status

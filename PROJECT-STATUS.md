@@ -1,8 +1,8 @@
 # unix-goto Project Status
 
-**Last Updated:** 2025-10-07
+**Last Updated:** 2025-10-07 (Post-Planning Session)
 **Current Version:** v0.2.0
-**Current Phase:** Phase 2 ✅ Complete → Moving to Phase 3
+**Current Phase:** Phase 2 ✅ Complete → Pre-Phase 3 Critical Improvements
 
 ---
 
@@ -11,11 +11,12 @@
 | Metric | Status |
 |--------|--------|
 | **Latest Release** | v0.2.0 (2025-10-07) |
-| **Latest Commit** | a1ee10d - Add PROJECT-STATUS.md |
+| **Latest Commit** | f27216f - Update PROJECT-STATUS.md |
+| **Workflow Status** | ⚠️ Direct push to master (needs branch protection) |
 | **Phases Complete** | 2 of 6 (33%) |
 | **Total Features** | 9 commands implemented |
-| **Uncommitted Work** | Clean - only local docs (QUICK-START, TESTING, TEST-RESULTS) |
-| **Next Milestone** | Phase 3: Smart Search & Discovery |
+| **Uncommitted Work** | 2 new files (TESTING-GUIDE.md + updates) |
+| **Next Milestone** | Critical: Workflow + Multi-depth + Testing |
 
 ---
 
@@ -64,21 +65,28 @@
 
 ## 🔄 Current Work
 
-**Status:** Clean working tree ✅
-**Last Commit:** a1ee10d - Add PROJECT-STATUS.md as canonical source of truth
+**Status:** Working on critical improvements 🔄
+**Last Commit:** f27216f - Update PROJECT-STATUS.md with latest commit info
 **Last Tag:** v0.2.0
-**Branch:** master (up to date with origin/master)
+**Branch:** master (direct push - needs branch protection setup)
 
-### Recently Committed (a1ee10d)
-- ✅ `PROJECT-STATUS.md` - Canonical project state tracker
-- ✅ `.claude/commands/current.md` - Updated slash command with mandatory update policy
+### Recently Committed (f27216f)
+- ✅ `PROJECT-STATUS.md` - Updated with latest commit references
+
+### Uncommitted Changes (In Progress)
+- 📝 `TESTING-GUIDE.md` - **NEW** Comprehensive testing guide for all features
+- 📝 `PROJECT-STATUS.md` - Updated with critical improvements roadmap
+- 📝 `.claude/commands/current.md` - Added testing reminder at top
 
 ### Untracked Files (Local Documentation)
 - `QUICK-START.md` - Quick reference guide (local/personal)
 - `TEST-RESULTS.md` - Testing documentation (local/personal)
 - `TESTING.md` - Testing procedures (local/personal)
 
-**Decision:** Documentation files remain local for now. Core project tracking now in PROJECT-STATUS.md.
+### Identified Critical Improvements
+1. ⚠️ **Branch Protection Needed** - Currently direct pushing to master
+2. ⚠️ **Multi-level Navigation** - goto only works at root level
+3. ✅ **Testing Guide Created** - TESTING-GUIDE.md now available
 
 ---
 
@@ -134,7 +142,8 @@ PROJECT-STATUS.md           ✅ Canonical project state tracker
 README.md                   ✅ Main project documentation (updated v0.2.0)
 CHANGELOG.md                ✅ Change history (updated v0.2.0)
 ROADMAP.md                  ✅ Future planning (Phase 2 marked complete)
-PROJECT-STATUS.md           ✅ This file - canonical state snapshot
+PROJECT-STATUS.md           ✅ Canonical state snapshot (updated with critical items)
+TESTING-GUIDE.md            🔄 NEW - Comprehensive testing guide (uncommitted)
 QUICK-START.md              📝 Untracked - Quick reference
 TESTING.md                  📝 Untracked - Testing procedures
 TEST-RESULTS.md             📝 Untracked - Test results
@@ -152,47 +161,91 @@ tests/                      ⏳ Test suite (Technical Improvements)
 
 ## 🎯 Immediate Next Steps (Priority Order)
 
-### 1. Documentation Cleanup 🔥 **HIGH PRIORITY**
+### 1. Development Workflow Improvements 🔥 **CRITICAL**
+- [ ] **Set up branch protection on GitHub**
+  - Require PR reviews before merging to master
+  - Prevent direct pushes to master
+  - Enable status checks
+- [ ] **Establish branching strategy**
+  - Use feature branches for significant changes (feature/*, fix/*, docs/*)
+  - Create branches for Phase 3 work
+  - Document workflow in CONTRIBUTING.md
+
+### 2. Core Functionality Enhancement 🔥 **HIGH PRIORITY**
+- [ ] **Multi-level depth navigation**
+  - Allow goto to work at various directory depths
+  - Support nested folder navigation without configuration changes
+  - Example: `goto project/subfolder/deep` should work
+  - Design: Update search algorithm to handle paths with slashes
+
+### 3. Testing Infrastructure 🔥 **HIGH PRIORITY**
+- [ ] **Create comprehensive testing guide**
+  - Add to /current command at top
+  - Document how to test each command
+  - Include test scenarios and expected outputs
+  - Add regression test checklist
+- [ ] Create automated test suite (ROADMAP:195-197)
+- [ ] Add shellcheck linting (ROADMAP:197)
+
+### 4. Documentation Cleanup
 - [ ] Decide on fate of untracked docs (commit or .gitignore)
 - [ ] Create `examples/usage.md` (referenced in README)
 - [ ] Create `CONTRIBUTING.md` (referenced in ROADMAP)
 
-### 2. Begin Phase 3 Planning
+### 5. Begin Phase 3 Planning
 - [ ] Design `finddir` command specification
 - [ ] Research find/fd integration patterns
 - [ ] Define search criteria grammar for Claude AI
 - [ ] Create Phase 3 implementation plan
 
-### 3. Technical Debt (Can run parallel to Phase 3)
-- [ ] Add shellcheck linting (ROADMAP:197)
+### 6. Technical Debt (Can run parallel to Phase 3)
 - [ ] Implement fuzzy matching for folder names (ROADMAP:189)
 - [ ] Add tab completion support (ROADMAP:190)
-- [ ] Create test suite (ROADMAP:195-197)
 
 ---
 
 ## 🐛 Known Issues / Technical Debt
 
-1. **Missing Examples File**
+### Critical (Must Fix Before Phase 3)
+
+1. **No Branch Protection / Direct Push to Master**
+   - Currently pushing directly to master branch
+   - No PR review process
+   - **Risk:** Accidental breaking changes, lost work
+   - **Solution:** Enable GitHub branch protection + PR workflow
+
+2. **Limited Navigation Depth**
+   - goto only works at root level of search paths
+   - Cannot navigate to nested folders without adding parent to search paths
+   - **Impact:** Limited flexibility, requires configuration changes for deep folders
+   - **Solution:** Support multi-level paths in goto command
+
+3. **No Testing Framework**
+   - No automated tests or testing guide
+   - Manual testing only, high regression risk
+   - **Impact:** Cannot verify changes don't break existing functionality
+   - **Solution:** Create testing guide and automated test suite
+
+### High Priority
+
+4. **Missing Examples File**
    - README references `examples/usage.md` at line 153
    - File doesn't exist yet
    - **Impact:** Broken documentation link
 
-2. **Missing Contributing Guide**
+5. **Missing Contributing Guide**
    - ROADMAP references `CONTRIBUTING.md` at line 239
-   - File not created
-   - **Impact:** No contributor onboarding
+   - No branching/workflow documentation
+   - **Impact:** No contributor onboarding, unclear development process
 
-3. **No Test Coverage**
-   - Testing framework planned but not implemented
-   - **Impact:** Manual testing only, regression risk
+### Medium Priority
 
-4. **No Config File Support**
+6. **No Config File Support**
    - `~/.gotorc` planned for Phase 4
    - Currently requires editing source files
    - **Impact:** Limited customization
 
-5. **macOS-Specific Commands**
+7. **macOS-Specific Commands**
    - Some commands use `/usr/bin/` prefixes for macOS
    - May need Linux compatibility testing
    - **Impact:** Potential cross-platform issues
