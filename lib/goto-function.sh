@@ -30,6 +30,8 @@ goto() {
         echo ""
         echo "Usage:"
         echo "  goto <project>           Navigate to project folder"
+        echo "  goto <path/to/folder>    Navigate to nested folder (multi-level)"
+        echo "  goto <unique-name>       Find and navigate to uniquely named folder"
         echo "  goto @<bookmark>         Navigate to bookmarked location"
         echo "  goto ~                   Return to home directory"
         echo "  goto zshrc               Source and display .zshrc"
@@ -44,6 +46,14 @@ goto() {
         echo ""
         echo "Folder names:"
         echo "  GAI-3101, WA3590, etc.   Any subfolder in search paths"
+        echo ""
+        echo "Multi-level navigation:"
+        echo "  GAI-3101/docs            Navigate to nested folders"
+        echo "  LUXOR/Git_Repos/unix-goto  Full path navigation"
+        echo ""
+        echo "Smart search (recursively finds unique folders):"
+        echo "  unix-goto                Finds LUXOR/Git_Repos/unix-goto"
+        echo "  If multiple matches, shows options"
         echo ""
         echo "Bookmarks:"
         echo "  @work, @proj1, etc.      Saved bookmark locations"
@@ -131,15 +141,82 @@ goto() {
         "$HOME/Documents/LUXOR/PROJECTS"
     )
 
-    # Try direct folder match first
+    # Check if input contains path separators (multi-level navigation)
+    if [[ "$1" == */* ]]; then
+        # Multi-level path: goto project/subfolder/deep
+        local base_segment="${1%%/*}"
+        local rest_path="${1#*/}"
+
+        # Search for base segment in search paths
+        for base_path in "${search_paths[@]}"; do
+            if [ -d "$base_path/$base_segment" ]; then
+                local full_path="$base_path/$base_segment/$rest_path"
+                if [ -d "$full_path" ]; then
+                    __goto_navigate_to "$full_path"
+                    return 0
+                else
+                    echo "❌ Path not found: $full_path"
+                    echo "Base folder '$base_segment' found, but '$rest_path' doesn't exist within it"
+                    return 1
+                fi
+            fi
+        done
+
+        # Base segment not found
+        echo "❌ Base folder not found: $base_segment"
+        echo "Try 'goto list --folders' to see available folders"
+        return 1
+    fi
+
+    # Try direct folder match at root level first
     local target_dir
     for base_path in "${search_paths[@]}"; do
         if [ -d "$base_path/$1" ]; then
             target_dir="$base_path/$1"
             __goto_navigate_to "$target_dir"
-            return
+            return 0
         fi
     done
+
+    # If not found at root level, search recursively for unique folder names
+    # This allows: goto unix-goto (finds LUXOR/Git_Repos/unix-goto)
+    echo "🔍 Searching in subdirectories..."
+
+    local matches=()
+    for base_path in "${search_paths[@]}"; do
+        if [ -d "$base_path" ]; then
+            # Find all directories matching the name (max depth 3 for performance)
+            while IFS= read -r match; do
+                matches+=("$match")
+            done < <(/usr/bin/find "$base_path" -maxdepth 3 -type d -name "$1" 2>/dev/null)
+        fi
+    done
+
+    # Check results
+    if [ ${#matches[@]} -eq 0 ]; then
+        # No matches found anywhere
+        echo "❌ Project not found: $1"
+        echo "Try 'goto list --folders' to see available folders"
+        return 1
+    elif [ ${#matches[@]} -eq 1 ]; then
+        # Exactly one match - navigate to it
+        echo "✓ Found: ${matches[0]}"
+        __goto_navigate_to "${matches[0]}"
+        return 0
+    else
+        # Multiple matches - show options
+        echo "⚠️  Multiple folders named '$1' found:"
+        echo ""
+        local i=1
+        for match in "${matches[@]}"; do
+            echo "  $i) $match"
+            ((i++))
+        done
+        echo ""
+        echo "Please be more specific or use the full path:"
+        echo "  Example: goto Git_Repos/$1"
+        return 1
+    fi
 
     # If no direct match and input contains spaces or looks like natural language, use Claude AI
     if [[ "$*" == *" "* ]] || [[ ${#1} -gt 20 ]]; then
