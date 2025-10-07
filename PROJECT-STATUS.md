@@ -11,9 +11,10 @@
 | Metric | Status |
 |--------|--------|
 | **Latest Release** | v0.2.0 (2025-10-07) |
+| **Latest Commit** | a1ee10d - Add PROJECT-STATUS.md |
 | **Phases Complete** | 2 of 6 (33%) |
 | **Total Features** | 9 commands implemented |
-| **Uncommitted Work** | Clean (only docs untracked) |
+| **Uncommitted Work** | Clean - only local docs (QUICK-START, TESTING, TEST-RESULTS) |
 | **Next Milestone** | Phase 3: Smart Search & Discovery |
 
 ---
@@ -63,18 +64,21 @@
 
 ## 🔄 Current Work
 
-**Status:** Clean working tree
-**Last Commit:** 5a80f9f - Release v0.2.0
+**Status:** Clean working tree ✅
+**Last Commit:** a1ee10d - Add PROJECT-STATUS.md as canonical source of truth
 **Last Tag:** v0.2.0
+**Branch:** master (up to date with origin/master)
 
-### Untracked Files (Documentation)
-- `.claude/` - Claude AI configuration (project tooling)
-- `QUICK-START.md` - Quick reference guide
-- `TEST-RESULTS.md` - Testing documentation
-- `TESTING.md` - Testing procedures
-- `PROJECT-STATUS.md` - This file
+### Recently Committed (a1ee10d)
+- ✅ `PROJECT-STATUS.md` - Canonical project state tracker
+- ✅ `.claude/commands/current.md` - Updated slash command with mandatory update policy
 
-**Decision Needed:** Should documentation files be committed or kept local?
+### Untracked Files (Local Documentation)
+- `QUICK-START.md` - Quick reference guide (local/personal)
+- `TEST-RESULTS.md` - Testing documentation (local/personal)
+- `TESTING.md` - Testing procedures (local/personal)
+
+**Decision:** Documentation files remain local for now. Core project tracking now in PROJECT-STATUS.md.
 
 ---
 
@@ -121,7 +125,8 @@ lib/
 ### Installation & Configuration
 ```
 install.sh                  ✅ Automated installation script
-.claude/commands/current.md ✅ Project status slash command
+.claude/commands/current.md ✅ Project status slash command (with update policy)
+PROJECT-STATUS.md           ✅ Canonical project state tracker
 ```
 
 ### Documentation
@@ -211,10 +216,21 @@ tests/                      ⏳ Test suite (Technical Improvements)
 
 ---
 
-## 🚀 Recent Release History
+## 🚀 Recent Commit History
 
-### v0.2.0 (2025-10-07)
-**Phase 2: Navigation History & Bookmarks**
+### a1ee10d (2025-10-07) - Add PROJECT-STATUS.md as canonical source of truth
+**Infrastructure: Project State Tracking**
+
+Added:
+- PROJECT-STATUS.md with complete project state snapshot
+- Mandatory update policy in .claude/commands/current.md
+
+Impact: Ensures project state is never lost across sessions
+
+Files: 2 changed, 341 insertions
+
+### v0.2.0 / 5a80f9f (2025-10-07)
+**Phase 2: Navigation History & Bookmarks** ⭐ RELEASE
 
 Added:
 - Navigation history tracking
