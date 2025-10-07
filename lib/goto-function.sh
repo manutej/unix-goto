@@ -30,8 +30,10 @@ goto() {
         echo ""
         echo "Usage:"
         echo "  goto <project>           Navigate to project folder"
+        echo "  goto @<bookmark>         Navigate to bookmarked location"
         echo "  goto ~                   Return to home directory"
         echo "  goto zshrc               Source and display .zshrc"
+        echo "  goto list                List all available destinations"
         echo "  goto --help              Show this help"
         echo ""
         echo "Direct shortcuts:"
@@ -42,6 +44,10 @@ goto() {
         echo ""
         echo "Folder names:"
         echo "  GAI-3101, WA3590, etc.   Any subfolder in search paths"
+        echo ""
+        echo "Bookmarks:"
+        echo "  @work, @proj1, etc.      Saved bookmark locations"
+        echo "  Use 'bookmark --help' for bookmark management"
         echo ""
         echo "Natural language (powered by Claude):"
         echo "  'the halcon project'"
@@ -57,8 +63,27 @@ goto() {
         return
     fi
 
+    # Handle bookmark syntax (@name)
+    if [[ "$1" == @* ]]; then
+        local bookmark_name="${1#@}"
+        if command -v __goto_bookmark_goto &> /dev/null; then
+            __goto_bookmark_goto "$bookmark_name"
+        else
+            echo "⚠️  Bookmark system not loaded"
+        fi
+        return
+    fi
+
     # Handle special cases
     case "$1" in
+        list)
+            if command -v __goto_list &> /dev/null; then
+                __goto_list "$2"
+            else
+                echo "⚠️  List command not loaded"
+            fi
+            return
+            ;;
         "~")
             cd "$HOME"
             echo "→ $HOME"

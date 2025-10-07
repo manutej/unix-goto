@@ -27,6 +27,17 @@ Smart Unix navigation tools powered by Claude AI. Navigate your filesystem using
   - `recent` → List 10 most recent folders
   - `recent --goto 3` → Navigate to 3rd recent folder
 
+- **Bookmarks**: Save and manage favorite locations
+  - `bookmark add proj1` → Bookmark current directory
+  - `goto @proj1` → Navigate to bookmark using @ syntax
+  - `bookmark list` → Show all bookmarks
+  - `bm` → Short alias for bookmark command
+
+- **Discovery**: List and explore available destinations
+  - `goto list` → Show all available destinations
+  - `goto list --shortcuts` → Show only shortcuts
+  - `goto list --bookmarks` → Show only bookmarks
+
 - **Special Commands**:
   - `goto ~` → Return to home directory
   - `goto zshrc` → Source and display .zshrc with syntax highlighting
@@ -88,6 +99,25 @@ recent --goto 3     # Navigate to 3rd recent folder
 recent --clear      # Clear recent history
 ```
 
+### Bookmarks
+```bash
+bookmark add work               # Bookmark current directory as 'work'
+bookmark add api ~/code/api     # Bookmark specific path
+bookmark list                   # Show all bookmarks
+bookmark goto work              # Navigate to bookmark
+goto @work                      # Navigate using @ syntax (shortcut)
+bookmark rm work                # Remove bookmark
+bm list                         # Short alias for bookmark
+```
+
+### Discovery
+```bash
+goto list                # Show all available destinations
+goto list --shortcuts    # Show only predefined shortcuts
+goto list --folders      # Show only folders in search paths
+goto list --bookmarks    # Show only bookmarks
+```
+
 ## Configuration
 
 The `goto` function searches in these locations by default:
@@ -127,12 +157,16 @@ unix-goto/
 
 ## Roadmap
 
-- [ ] Add `back` command for navigation history
-- [ ] Add `recent` to show recently visited folders
-- [ ] Add `bookmark` system for favorite locations
-- [ ] Add fuzzy matching for folder names
-- [ ] Support for custom configuration file
-- [ ] Add `list` command to show all available folders
+- [x] Navigation history with `back` command
+- [x] Recent folders with `recent` command
+- [x] Bookmark system with `bookmark` command
+- [x] Discovery with `goto list` command
+- [ ] Fuzzy matching for folder names
+- [ ] Custom configuration file (~/.gotorc)
+- [ ] Workspace management for multi-folder projects
+- [ ] Natural language directory search with `finddir`
+
+See [ROADMAP.md](ROADMAP.md) for detailed future plans.
 
 ## Contributing
 

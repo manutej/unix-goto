@@ -19,15 +19,15 @@ __goto_stack_push() {
     echo "$dir" >> "$GOTO_STACK_FILE"
 
     # Keep stack size reasonable (max 50 entries)
-    tail -n 50 "$GOTO_STACK_FILE" > "$GOTO_STACK_FILE.tmp"
-    mv "$GOTO_STACK_FILE.tmp" "$GOTO_STACK_FILE"
+    /usr/bin/tail -n 50 "$GOTO_STACK_FILE" > "$GOTO_STACK_FILE.tmp"
+    /bin/mv "$GOTO_STACK_FILE.tmp" "$GOTO_STACK_FILE"
 }
 
 # Pop from stack and navigate
 __goto_stack_pop() {
     __goto_stack_init
 
-    local stack_size=$(wc -l < "$GOTO_STACK_FILE")
+    local stack_size=$(/usr/bin/wc -l < "$GOTO_STACK_FILE")
 
     if [ "$stack_size" -le 1 ]; then
         echo "⚠️  Already at the first directory"
@@ -35,11 +35,11 @@ __goto_stack_pop() {
     fi
 
     # Remove last line and get the previous directory
-    local prev_dir=$(tail -n 2 "$GOTO_STACK_FILE" | head -n 1)
+    local prev_dir=$(/usr/bin/tail -n 2 "$GOTO_STACK_FILE" | /usr/bin/head -n 1)
 
-    # Remove last line from stack
-    head -n -1 "$GOTO_STACK_FILE" > "$GOTO_STACK_FILE.tmp"
-    mv "$GOTO_STACK_FILE.tmp" "$GOTO_STACK_FILE"
+    # Remove last line from stack (use sed for macOS compatibility)
+    /usr/bin/sed -i.bak '$d' "$GOTO_STACK_FILE"
+    /bin/rm -f "$GOTO_STACK_FILE.bak"
 
     if [ -d "$prev_dir" ]; then
         cd "$prev_dir"

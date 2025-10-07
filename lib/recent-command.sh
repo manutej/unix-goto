@@ -40,7 +40,7 @@ recent() {
             return 1
         fi
 
-        local target_dir=$(__goto_recent_dirs 50 | sed -n "${index}p")
+        local target_dir=$(__goto_recent_dirs 50 | /usr/bin/sed -n "${index}p")
 
         if [ -z "$target_dir" ]; then
             echo "⚠️  No folder at index $index"

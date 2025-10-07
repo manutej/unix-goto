@@ -52,6 +52,14 @@ EOF
     cat "$REPO_DIR/lib/recent-command.sh" >> "$SHELL_CONFIG"
     echo "" >> "$SHELL_CONFIG"
 
+    echo "# Bookmark command" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/bookmark-command.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
+    echo "# List command" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/list-command.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
     echo "# Main goto function" >> "$SHELL_CONFIG"
     cat "$REPO_DIR/lib/goto-function.sh" >> "$SHELL_CONFIG"
 fi

@@ -14,33 +14,33 @@ Build a comprehensive suite of Unix navigation and productivity tools that lever
 - [x] Installation script
 - [x] Documentation
 
-## Phase 2: Navigation History & Bookmarks (Next)
+## Phase 2: Navigation History & Bookmarks ✅ (Completed)
 
-### `back` - Navigate backward through history
+### `back` - Navigate backward through history ✅
 ```bash
 back              # Go to previous directory
 back 3            # Go back 3 directories in history
 back --list       # Show navigation history
 ```
 
-**Implementation:**
-- Maintain a history stack in a temp file or shell array
-- Hook into `cd` or wrap it to track directory changes
-- Support numeric arguments to go back N steps
+**Status:** ✅ Complete
+- Directory stack maintained in ~/.goto_stack
+- Support for numeric arguments
+- List and clear functionality
 
-### `recent` - Show recently visited folders
+### `recent` - Show recently visited folders ✅
 ```bash
 recent            # List 10 most recent folders
 recent 20         # List 20 most recent folders
 recent --goto 3   # Navigate to 3rd recent folder
 ```
 
-**Implementation:**
-- Log all `goto` usage to ~/.goto_history
-- Parse and display with timestamps
-- Integrate with goto for quick navigation
+**Status:** ✅ Complete
+- All goto usage logged to ~/.goto_history
+- Recent folder display with timestamps
+- Quick navigation with --goto
 
-### `bookmark` - Bookmark management
+### `bookmark` - Bookmark management ✅
 ```bash
 bookmark add proj1                    # Bookmark current folder as 'proj1'
 bookmark add proj1 ~/path/to/folder   # Bookmark specific path
@@ -50,10 +50,24 @@ bookmark goto proj1                   # Go to bookmark
 goto @proj1                           # Alternative syntax
 ```
 
-**Implementation:**
-- Store bookmarks in ~/.goto_bookmarks (JSON or key=value format)
-- Integrate with goto for @ prefix syntax
-- Support bookmark descriptions/notes
+**Status:** ✅ Complete
+- Bookmarks stored in ~/.goto_bookmarks
+- @ prefix syntax integrated with goto
+- Full CRUD operations (add, list, goto, remove)
+- Short alias: `bm`
+
+### `goto list` - Show available destinations ✅
+```bash
+goto list                # All available destinations
+goto list --shortcuts    # Only shortcuts
+goto list --bookmarks    # Only bookmarks
+goto list --folders      # Only folders
+```
+
+**Status:** ✅ Complete
+- Displays all navigation options
+- Categorized by type (shortcuts, bookmarks, folders)
+- Colored output for better readability
 
 ## Phase 3: Smart Search & Discovery
 
