@@ -11,10 +11,14 @@ echo "🚀 Installing unix-goto..."
 # Create bin directory if it doesn't exist
 mkdir -p "$INSTALL_DIR"
 
-# Copy the resolver script
-echo "📦 Installing goto-resolve to $INSTALL_DIR..."
+# Copy scripts to ~/bin
+echo "📦 Installing scripts to $INSTALL_DIR..."
 cp "$REPO_DIR/bin/goto-resolve" "$INSTALL_DIR/goto-resolve"
+cp "$REPO_DIR/bin/finddir" "$INSTALL_DIR/finddir"
+cp "$REPO_DIR/bin/finddir-resolver" "$INSTALL_DIR/finddir-resolver"
 chmod +x "$INSTALL_DIR/goto-resolve"
+chmod +x "$INSTALL_DIR/finddir"
+chmod +x "$INSTALL_DIR/finddir-resolver"
 
 # Detect shell
 SHELL_CONFIG=""
