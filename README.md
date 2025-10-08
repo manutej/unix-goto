@@ -18,6 +18,16 @@ Smart Unix navigation tools powered by Claude AI. Navigate your filesystem using
   - `goto GAI-3101`
   - `goto WA3590`
 
+- **Multi-Level Navigation**: Navigate to nested folders using paths
+  - `goto GAI-3101/docs` → Navigate to nested subfolder
+  - `goto LUXOR/Git_Repos/unix-goto` → Full path navigation
+  - Works with any depth: `goto project/sub/deep`
+
+- **Smart Search**: Automatically finds uniquely named folders
+  - `goto unix-goto` → Finds `LUXOR/Git_Repos/unix-goto` automatically
+  - Searches recursively (up to 3 levels deep)
+  - Shows disambiguation menu if multiple matches found
+
 - **Navigation History**: Automatic tracking and navigation history
   - `back` → Go to previous directory
   - `back 3` → Go back 3 directories
@@ -70,6 +80,27 @@ source ~/.zshrc  # or source ~/.bashrc
 goto luxor          # Go to Documents/LUXOR
 goto infra          # Go to ASCIIDocs/infra
 goto GAI-3101       # Go to any project folder
+```
+
+### Multi-Level Navigation
+```bash
+goto GAI-3101/docs              # Navigate to nested folder
+goto LUXOR/Git_Repos/unix-goto  # Full path navigation
+goto PROJECTS/HALCON/config     # Multiple levels deep
+```
+
+### Smart Search (Finds Unique Folders)
+```bash
+goto unix-goto      # Finds LUXOR/Git_Repos/unix-goto automatically
+# 🔍 Searching in subdirectories...
+# ✓ Found: /Users/.../Documents/LUXOR/Git_Repos/unix-goto
+
+# If multiple matches exist:
+goto docs
+# ⚠️  Multiple folders named 'docs' found:
+#   1) /Users/.../ASCIIDocs/docs
+#   2) /Users/.../LUXOR/project1/docs
+# Please be more specific or use the full path
 ```
 
 ### Natural Language (Powered by Claude AI)
