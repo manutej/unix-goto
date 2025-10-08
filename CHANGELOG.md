@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-10-08
+
+### Added
+- **Multi-level navigation support**: Navigate to nested folders using path separators
+  - `goto project/subfolder/deep` now works seamlessly
+  - Finds base folder in search paths, then navigates to nested path
+  - Clear error messages if base exists but subpath doesn't
+- **Recursive unique folder search**: Automatically finds folders by name
+  - `goto unix-goto` finds `LUXOR/Git_Repos/unix-goto` automatically
+  - Searches up to 3 levels deep in all search paths
+  - Shows disambiguation menu if multiple matches found
+  - Performance optimized with maxdepth 3
+- CONTRIBUTING.md: Complete contributor guide
+  - Branch protection and PR workflow documentation
+  - Branching strategy (feature/*, fix/*, docs/*, test/*)
+  - Pull request templates and guidelines
+  - Code style standards
+- ENHANCED-NAVIGATION-TESTS.md: Comprehensive testing guide
+  - 20+ test scenarios for new features
+  - Integration and regression tests
+  - Performance testing procedures
+
+### Changed
+- Enhanced goto help text with multi-level and smart search examples
+- Improved error messages with helpful suggestions
+- Root-level folder matching now explicitly returns 0 for consistency
+
+## [0.2.0] - 2025-10-07
+
 ### Added
 - Navigation history tracking for all `goto` commands
 - `back` command to navigate backward through directory history
