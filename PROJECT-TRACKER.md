@@ -17,9 +17,10 @@
 | **Completed** | 2 (CET-77, CET-85) |
 | **In Progress** | 0 |
 | **Backlog** | 7 |
-| **Total Commits** | 6 (on feature branch) |
+| **Total Commits** | 9 (on feature branch) |
 | **Lines of Code** | ~7,000+ (Phase 3 additions) |
 | **Test Coverage** | 100% for benchmarks and caching |
+| **Installation** | ONE line: `source goto.sh` |
 
 ---
 
