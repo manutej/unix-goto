@@ -1,0 +1,11 @@
+Unix-goto Code Coverage Report
+Generated: Fri Oct 17 14:29:54 CST 2025
+
+Summary:
+  Library Files: 9
+  Functions: 44
+  Lines of Code: 1639
+  Test Files: 8
+  Test Cases: 92
+  Assertions: 58
+  Coverage: 60%
