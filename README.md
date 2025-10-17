@@ -48,6 +48,13 @@ Smart Unix navigation tools powered by Claude AI. Navigate your filesystem using
   - `goto list --shortcuts` → Show only shortcuts
   - `goto list --bookmarks` → Show only bookmarks
 
+- **Performance Benchmarks**: Measure and optimize navigation performance
+  - `goto benchmark navigation` → Test navigation speed (cached vs uncached)
+  - `goto benchmark cache` → Test cache performance and hit rate
+  - `goto benchmark parallel` → Test parallel search performance
+  - `goto benchmark report` → Generate performance summary
+  - `benchmark-goto all` → Run complete benchmark suite
+
 - **Special Commands**:
   - `goto ~` → Return to home directory
   - `goto zshrc` → Source and display .zshrc with syntax highlighting
@@ -149,7 +156,29 @@ goto list --folders      # Show only folders in search paths
 goto list --bookmarks    # Show only bookmarks
 ```
 
+### Performance Benchmarks
+```bash
+# Run specific benchmarks
+goto benchmark navigation              # Test navigation performance
+goto benchmark cache typical           # Test cache with typical workspace (50 folders)
+goto benchmark parallel                # Test parallel search performance
+goto benchmark report                  # Generate comprehensive report
+
+# Run complete suite
+goto benchmark all                     # Run all benchmarks (5 iterations each)
+benchmark-goto all                     # Standalone execution
+
+# Manage test workspaces
+goto benchmark workspace create large  # Create large test workspace (200+ folders)
+goto benchmark workspace stats         # Show workspace statistics
+goto benchmark workspace clean         # Remove test workspace
+
+# See BENCHMARKS.md for complete documentation
+```
+
 ## Configuration
+
+### Current Configuration (v0.3.0)
 
 The `goto` function searches in these locations by default:
 - `$HOME/ASCIIDocs`
@@ -163,6 +192,27 @@ local search_paths=(
     "$HOME/your/custom/path"
     "$HOME/another/path"
 )
+```
+
+### Coming in Phase 1 (v0.4.0)
+
+**~/.gotorc Configuration File** - User-level configuration with no source file editing required:
+
+```bash
+# ~/.gotorc example
+GOTO_SEARCH_DEPTH=5              # Default search depth (currently hard-coded at 3)
+GOTO_CACHE_TTL=86400             # Cache refresh time (24 hours)
+GOTO_SEARCH_PATHS=(              # Custom search paths
+    "$HOME/projects"
+    "$HOME/work"
+)
+```
+
+Manage configuration with `goto config` commands:
+```bash
+goto config                      # Show current configuration
+goto config set depth 4          # Update search depth
+goto config list                 # List all settings
 ```
 
 ## How It Works
@@ -186,18 +236,72 @@ unix-goto/
 └── README.md
 ```
 
-## Roadmap
+## Development Roadmap
 
+### ✅ Completed Features
+- [x] Core navigation with natural language support
 - [x] Navigation history with `back` command
 - [x] Recent folders with `recent` command
 - [x] Bookmark system with `bookmark` command
 - [x] Discovery with `goto list` command
-- [ ] Fuzzy matching for folder names
-- [ ] Custom configuration file (~/.gotorc)
-- [ ] Workspace management for multi-folder projects
-- [ ] Natural language directory search with `finddir`
+- [x] Multi-level navigation (goto project/sub/deep)
+- [x] Recursive unique folder search
 
-See [ROADMAP.md](ROADMAP.md) for detailed future plans.
+### 🚀 Phase 1: Performance Foundation (v0.4.0 - In Progress)
+**Focus:** Speed and core usability improvements
+
+- [ ] **Folder Index Caching System** - Reduce navigation from ~2-5s to <100ms
+  - `goto index rebuild` - Build/rebuild cache
+  - `goto index status` - Show cache stats
+  - Auto-refresh when stale (24 hours)
+
+- [ ] **Quick Bookmark Current Directory** - Remove friction from bookmarking
+  - `bookmark .` - Bookmark current dir with folder name
+  - `bookmark here proj1` - Bookmark current dir as "proj1"
+
+- [ ] **Configurable Search Depth** - User control via config file
+  - `~/.gotorc` configuration file
+  - `goto --depth N` for one-time override
+  - `goto config` - Manage configuration
+
+### 🎯 Phase 2: Developer Experience (v0.5.0 - Planned)
+**Focus:** Scripting and automation support
+
+- [ ] **Tab Completion** - Bash/Zsh completion for all commands
+  - Complete subcommands, bookmarks, folders
+  - Auto-install via install.sh
+
+- [ ] **Batch-Friendly Output Modes** - Enable scripting integration
+  - `goto list --format json|simple|csv`
+  - `goto --quiet` - Suppress human-readable output
+  - `goto pwd <target>` - Print path without navigating
+  - `goto check <target>` - Existence test (exit code)
+
+- [ ] **Execute in Target Directory** - Run commands without permanent navigation
+  - `goto exec luxor "git status"` - Run and return
+  - `goto exec --stay` - Navigate and stay
+
+### ⚡ Phase 3: Advanced Optimization (v0.6.0 - In Progress)
+**Focus:** Performance and smart matching
+
+- [ ] **Parallel Search** - Search multiple paths simultaneously (~50% faster)
+- [ ] **Fuzzy Matching** - Find folders with typos (goto halcn → HALCON)
+- [x] **Performance Benchmarks** - Measure and track improvements ✅ **COMPLETED**
+  - Navigation benchmarks (uncached vs cached, target <100ms)
+  - Cache performance testing (hit rate target >90%)
+  - Parallel search benchmarks (sequential vs parallel)
+  - Test workspace generation (small/typical/large)
+  - Comprehensive reporting with CSV export
+  - Standalone `benchmark-goto` executable
+  - See [BENCHMARKS.md](BENCHMARKS.md) for complete documentation
+
+### 🔮 Future Phases
+- Natural language directory search with `finddir` (AI-powered)
+- Workspace management for multi-folder projects
+- Git integration (branches, repos)
+- IDE integration (VS Code, JetBrains)
+
+See [ROADMAP.md](ROADMAP.md) for complete feature roadmap and [PROJECT-STATUS.md](PROJECT-STATUS.md) for current development status.
 
 ## Contributing
 

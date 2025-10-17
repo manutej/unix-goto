@@ -94,6 +94,15 @@ goto() {
             fi
             return
             ;;
+        benchmark|bench)
+            if command -v __goto_benchmark &> /dev/null; then
+                shift
+                __goto_benchmark "$@"
+            else
+                echo "⚠️  Benchmark command not loaded"
+            fi
+            return
+            ;;
         "~")
             cd "$HOME"
             echo "→ $HOME"

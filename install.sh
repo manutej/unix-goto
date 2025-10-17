@@ -16,9 +16,11 @@ echo "📦 Installing scripts to $INSTALL_DIR..."
 cp "$REPO_DIR/bin/goto-resolve" "$INSTALL_DIR/goto-resolve"
 cp "$REPO_DIR/bin/finddir" "$INSTALL_DIR/finddir"
 cp "$REPO_DIR/bin/finddir-resolver" "$INSTALL_DIR/finddir-resolver"
+cp "$REPO_DIR/bin/benchmark-goto" "$INSTALL_DIR/benchmark-goto"
 chmod +x "$INSTALL_DIR/goto-resolve"
 chmod +x "$INSTALL_DIR/finddir"
 chmod +x "$INSTALL_DIR/finddir-resolver"
+chmod +x "$INSTALL_DIR/benchmark-goto"
 
 # Detect shell
 SHELL_CONFIG=""
@@ -62,6 +64,14 @@ EOF
 
     echo "# List command" >> "$SHELL_CONFIG"
     cat "$REPO_DIR/lib/list-command.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
+    echo "# Benchmark command" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/benchmark-command.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
+    echo "# Benchmark workspace utilities" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/benchmark-workspace.sh" >> "$SHELL_CONFIG"
     echo "" >> "$SHELL_CONFIG"
 
     echo "# Main goto function" >> "$SHELL_CONFIG"
