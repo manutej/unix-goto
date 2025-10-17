@@ -62,6 +62,10 @@ EOF
     cat "$REPO_DIR/lib/bookmark-command.sh" >> "$SHELL_CONFIG"
     echo "" >> "$SHELL_CONFIG"
 
+    echo "# Cache index system" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/cache-index.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
     echo "# List command" >> "$SHELL_CONFIG"
     cat "$REPO_DIR/lib/list-command.sh" >> "$SHELL_CONFIG"
     echo "" >> "$SHELL_CONFIG"

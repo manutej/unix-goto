@@ -94,6 +94,15 @@ goto() {
             fi
             return
             ;;
+        index)
+            if command -v __goto_index_command &> /dev/null; then
+                shift
+                __goto_index_command "$@"
+            else
+                echo "⚠️  Index/cache command not loaded"
+            fi
+            return
+            ;;
         benchmark|bench)
             if command -v __goto_benchmark &> /dev/null; then
                 shift
@@ -177,6 +186,33 @@ goto() {
         return 1
     fi
 
+    # NEW: Try cache lookup first (O(1) performance)
+    if command -v __goto_cache_lookup &> /dev/null; then
+        local cache_result
+        cache_result=$(__goto_cache_lookup "$1" 2>/dev/null)
+        local lookup_status=$?
+
+        if [ $lookup_status -eq 0 ]; then
+            # Single match found in cache
+            echo "✓ Found in cache: $cache_result"
+            __goto_navigate_to "$cache_result"
+            return 0
+        elif [ $lookup_status -eq 2 ]; then
+            # Multiple matches in cache
+            echo "⚠️  Multiple folders named '$1' found in cache:"
+            echo ""
+            local i=1
+            while IFS= read -r match; do
+                echo "  $i) $match"
+                ((i++))
+            done <<< "$cache_result"
+            echo ""
+            echo "Please be more specific or use the full path"
+            return 1
+        fi
+        # If cache lookup failed (status 1), fall through to regular search
+    fi
+
     # Try direct folder match at root level first
     local target_dir
     for base_path in "${search_paths[@]}"; do
@@ -189,7 +225,7 @@ goto() {
 
     # If not found at root level, search recursively for unique folder names
     # This allows: goto unix-goto (finds LUXOR/Git_Repos/unix-goto)
-    echo "🔍 Searching in subdirectories..."
+    echo "🔍 Searching in subdirectories (cache miss)..."
 
     local matches=()
     for base_path in "${search_paths[@]}"; do
