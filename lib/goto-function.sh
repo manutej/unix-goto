@@ -6,13 +6,22 @@
 __goto_navigate_to() {
     local target_dir="$1"
 
+    # Verify target directory exists before attempting navigation
+    if [ ! -d "$target_dir" ]; then
+        echo "❌ Error: Directory not found: $target_dir" >&2
+        return 1
+    fi
+
     # Push current directory to stack before navigating
     if command -v __goto_stack_push &> /dev/null; then
         __goto_stack_push "$PWD"
     fi
 
-    # Navigate
-    cd "$target_dir"
+    # Navigate with error checking
+    if ! cd "$target_dir" 2>/dev/null; then
+        echo "❌ Error: Failed to navigate to: $target_dir" >&2
+        return 1
+    fi
 
     # Track in history
     if command -v __goto_track &> /dev/null; then
@@ -20,6 +29,7 @@ __goto_navigate_to() {
     fi
 
     echo "→ $PWD"
+    return 0
 }
 
 # Quick project navigation with natural language support
@@ -82,6 +92,16 @@ goto() {
             echo "⚠️  Bookmark system not loaded"
         fi
         return
+    fi
+
+    # Check regular bookmarks (without @ prefix) before searching
+    if command -v __goto_bookmark_get &> /dev/null; then
+        local bookmark_path=$(__goto_bookmark_get "$1" 2>/dev/null)
+        if [ -n "$bookmark_path" ] && [ -d "$bookmark_path" ]; then
+            echo "✓ Using bookmark: $1"
+            __goto_navigate_to "$bookmark_path"
+            return 0
+        fi
     fi
 
     # Handle special cases

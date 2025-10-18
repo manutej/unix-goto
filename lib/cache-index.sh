@@ -145,11 +145,16 @@ __goto_cache_lookup() {
     # Use grep for fast lookup (simulates hash table)
     local matches=()
 
+    # Use process substitution to avoid subshell (preserves array modifications)
     while IFS='|' read -r cached_name cached_path cached_depth cached_mtime; do
         # Skip comment lines
         if [[ "$cached_name" == \#* ]]; then
             continue
         fi
+
+        # Trim whitespace using xargs (handles padded fields in cache)
+        cached_name=$(echo "$cached_name" | xargs)
+        cached_path=$(echo "$cached_path" | xargs)
 
         # Exact match on folder name
         if [ "$cached_name" = "$folder_name" ]; then
