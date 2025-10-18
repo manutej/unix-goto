@@ -2,7 +2,13 @@
 # unix-goto - Single file loader
 # Usage: source /path/to/unix-goto/goto.sh
 
-GOTO_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/lib" && pwd)"
+GOTO_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/lib" 2>/dev/null && pwd)"
+
+# Verify lib directory exists
+if [ ! -d "$GOTO_LIB_DIR" ]; then
+    echo "Error: lib directory not found at expected location" >&2
+    return 1 2>/dev/null || exit 1
+fi
 
 # Load all modules in correct order
 source "$GOTO_LIB_DIR/history-tracking.sh"

@@ -14,11 +14,12 @@ source "$REPO_DIR/lib/bookmark-command.sh"
 source "$REPO_DIR/lib/cache-index.sh"
 
 # Performance thresholds (in milliseconds)
-# Adjusted for realistic macOS performance
-THRESHOLD_CACHE_LOOKUP=50
-THRESHOLD_BOOKMARK_LOOKUP=50
-THRESHOLD_HISTORY_ADD=30
-THRESHOLD_CACHE_BUILD=5000
+# These defaults are based on observed performance on macOS (2023).
+# Override by setting environment variables before running tests.
+THRESHOLD_CACHE_LOOKUP="${THRESHOLD_CACHE_LOOKUP:-50}"        # Max time for cache lookup
+THRESHOLD_BOOKMARK_LOOKUP="${THRESHOLD_BOOKMARK_LOOKUP:-50}"   # Max time for bookmark lookup
+THRESHOLD_HISTORY_ADD="${THRESHOLD_HISTORY_ADD:-30}"           # Max time to add history entry
+THRESHOLD_CACHE_BUILD="${THRESHOLD_CACHE_BUILD:-5000}"         # Max time to build cache
 
 # Test suite entry point
 main() {

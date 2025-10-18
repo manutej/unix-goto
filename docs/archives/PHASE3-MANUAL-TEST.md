@@ -20,6 +20,9 @@ chmod +x ~/bin/finddir-resolver
 
 # Reload shell to get updated goto list function
 source ~/.zshrc  # or source ~/.bashrc
+
+# Clear command cache so shell can find new commands
+hash -r
 ```
 
 ---
@@ -257,7 +260,13 @@ goto list --help
 ### Issue 1: "finddir: command not found"
 **Fix:**
 ```bash
-# Make sure ~/bin is in your PATH
+# First, clear the shell's command cache
+hash -r
+
+# Then try again
+finddir --help
+
+# If still not found, make sure ~/bin is in your PATH
 echo $PATH | grep "$HOME/bin"
 
 # If not found, add to ~/.zshrc or ~/.bashrc:
@@ -265,6 +274,7 @@ export PATH="$HOME/bin:$PATH"
 
 # Then reload:
 source ~/.zshrc
+hash -r
 ```
 
 ### Issue 2: "finddir-resolver not found"

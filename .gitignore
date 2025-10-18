@@ -34,3 +34,6 @@ test/
 # Local configuration
 .env
 .config.local
+
+# Development tools
+.claude/

@@ -124,7 +124,8 @@ test_very_long_bookmark_name() {
     local test_dir="$FIXTURE_DIR/test"
     mkdir -p "$test_dir"
 
-    # Create a 256-character bookmark name
+    # Create a 256-character bookmark name (typical filesystem name length limit)
+    # Tests boundary behavior for bookmark name validation
     local long_name=$(printf 'a%.0s' {1..256})
 
     if __goto_bookmark_add "$long_name" "$test_dir" 2>/dev/null; then

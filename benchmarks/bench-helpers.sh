@@ -63,7 +63,16 @@ bench_calculate_stats() {
         variance_sum=$((variance_sum + diff * diff))
     done
     local variance=$((variance_sum / count))
-    local stddev=$(echo "scale=2; sqrt($variance)" | bc 2>/dev/null || echo "0")
+
+    # Calculate sqrt with bc fallback to awk
+    local stddev
+    if command -v bc >/dev/null 2>&1; then
+        stddev=$(echo "scale=2; sqrt($variance)" | bc 2>/dev/null)
+    elif command -v awk >/dev/null 2>&1; then
+        stddev=$(awk -v var="$variance" 'BEGIN { printf "%.2f", sqrt(var) }')
+    else
+        stddev="0"
+    fi
 
     echo "$min,$max,$mean,$median,$stddev"
 }

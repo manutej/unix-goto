@@ -66,7 +66,17 @@ __goto_cache_build() {
             if [ -d "$folder_path" ]; then
                 local folder_name=$(basename "$folder_path")
                 local folder_depth=$(echo "$folder_path" | tr -cd '/' | wc -c)
-                local folder_mtime=$(stat -f %m "$folder_path" 2>/dev/null || echo "0")
+
+                # Cross-platform stat command (macOS vs Linux)
+                if stat -f %m "$folder_path" &>/dev/null; then
+                    # macOS/BSD
+                    local folder_mtime=$(stat -f %m "$folder_path" 2>/dev/null)
+                elif stat -c %Y "$folder_path" &>/dev/null; then
+                    # Linux/GNU
+                    local folder_mtime=$(stat -c %Y "$folder_path" 2>/dev/null)
+                else
+                    local folder_mtime="0"
+                fi
 
                 echo "$folder_name|$folder_path|$folder_depth|$folder_mtime" >> "$temp_index"
                 ((total_folders++))

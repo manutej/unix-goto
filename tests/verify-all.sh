@@ -29,9 +29,17 @@ echo "Step 2: Analyzing code coverage..."
 echo "────────────────────────────────────────────────────────────────"
 "$SCRIPT_DIR/coverage-analysis.sh"
 
-# Extract coverage percentage
+# Extract coverage percentage (robust parsing)
 if [ -f "$REPO_DIR/coverage-report.txt" ]; then
-    coverage=$(grep "Coverage:" "$REPO_DIR/coverage-report.txt" | grep -o '[0-9]*' | head -1)
+    # Extract coverage with more specific pattern
+    coverage=$(grep "Coverage:" "$REPO_DIR/coverage-report.txt" | sed 's/.*Coverage: *\([0-9]*\)%.*/\1/')
+
+    # Validate coverage is a number
+    if ! [[ "$coverage" =~ ^[0-9]+$ ]]; then
+        echo "⚠ Could not parse coverage from report"
+        coverage="0"
+    fi
+
     echo ""
     echo "Current Coverage: ${coverage}%"
 

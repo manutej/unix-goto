@@ -64,6 +64,35 @@ Smart Unix navigation tools powered by Claude AI. Navigate your filesystem using
   - `goto zshrc` → Source and display .zshrc with syntax highlighting
   - `goto --help` → Show help menu
 
+## Documentation
+
+### Quick Links
+
+- **[API Reference](docs/API.md)** - Complete function reference and technical API documentation
+- **[Developer Guide](docs/DEVELOPER-GUIDE.md)** - Contributing, architecture, and development workflow
+- **[Benchmarks](docs/BENCHMARKS.md)** - Performance testing and optimization guide
+- **[Standard Workflow](docs/STANDARD-WORKFLOW.md)** - Development best practices
+- **[Project Tracker](docs/PROJECT-TRACKER.md)** - Current status and roadmap
+- **[Troubleshooting](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+
+### For Users
+- Quick start: See [Usage](#usage) section below
+- All commands: See [API Reference](docs/API.md)
+- Performance: See [Benchmarks](docs/BENCHMARKS.md)
+- Troubleshooting: See [Troubleshooting](docs/TROUBLESHOOTING.md)
+
+### For Developers
+- Contributing: See [Developer Guide](docs/DEVELOPER-GUIDE.md)
+- Architecture: See [Architecture](docs/architecture/ARCHITECTURE.md)
+- Testing: See [Testing Guide](docs/testing/TESTING-README.md)
+- Cache Implementation: See [Cache Design](docs/architecture/CACHE-IMPLEMENTATION.md)
+
+### All Documentation
+- **[docs/](docs/)** - Core documentation
+  - **[docs/testing/](docs/testing/)** - Complete testing documentation
+  - **[docs/architecture/](docs/architecture/)** - Architecture and design docs
+  - **[docs/archives/](docs/archives/)** - Historical documents and delivery summaries
+
 ## Requirements
 
 - **Claude CLI** - The official Claude CLI tool ([Download](https://github.com/anthropics/claude-code))
@@ -260,9 +289,9 @@ The unix-goto project maintains 100% test coverage with a comprehensive test sui
 ### Documentation
 
 For complete testing documentation, see:
-- [TESTING-README.md](TESTING-README.md) - Complete testing guide
-- [TESTING-COMPREHENSIVE.md](TESTING-COMPREHENSIVE.md) - Enhanced testing guide with edge cases
-- [QUICK-REFERENCE-TESTING.md](QUICK-REFERENCE-TESTING.md) - Quick reference for common tasks
+- [TESTING-README.md](docs/testing/TESTING-README.md) - Complete testing guide
+- [TESTING-COMPREHENSIVE.md](docs/testing/TESTING-COMPREHENSIVE.md) - Enhanced testing guide with edge cases
+- [QUICK-REFERENCE-TESTING.md](docs/testing/QUICK-REFERENCE-TESTING.md) - Quick reference for common tasks
 
 ## Performance & Benchmarks
 
@@ -306,7 +335,7 @@ The benchmark suite measures:
 ### Documentation
 
 For complete benchmark documentation and methodology, see:
-- [BENCHMARKS-README.md](BENCHMARKS-README.md) - Complete benchmarking guide with detailed methodology
+- [BENCHMARKS-README.md](docs/testing/BENCHMARKS-README.md) - Complete benchmarking guide with detailed methodology
 
 ## How It Works
 

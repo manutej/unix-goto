@@ -24,8 +24,13 @@ __goto_list_all() {
     # Show bookmarks
     if [ "$show_bookmarks" = "true" ] && [ -f "$GOTO_BOOKMARKS_FILE" ] && [ -s "$GOTO_BOOKMARKS_FILE" ]; then
         echo "  \033[1;36m🔖 Bookmarks:\033[0m"
-        while IFS='|' read -r name path timestamp; do
-            printf "     @%-10s → %s\n" "$name" "$path"
+        while read -r line; do
+            # Parse line manually to avoid IFS issues
+            local bm_name="${line%%|*}"
+            local rest="${line#*|}"
+            local bm_path="${rest%%|*}"
+
+            printf "     @%-10s → %s\n" "$bm_name" "$bm_path"
         done < "$GOTO_BOOKMARKS_FILE"
         echo ""
     fi
@@ -91,19 +96,25 @@ __goto_list_recent() {
         history_reversed=$(/usr/bin/tail -r "$GOTO_HISTORY_FILE")
     fi
 
-    while IFS='|' read -r timestamp path; do
+    # Process history in a while loop with IFS properly scoped
+    # Use process substitution to avoid IFS leaking to parent shell
+    while read -r line; do
+        # Parse line manually instead of using IFS
+        local timestamp="${line%%|*}"
+        local dir_path="${line#*|}"
+
         # Skip if we've seen this path
-        if [[ " ${seen[@]} " =~ " ${path} " ]]; then
+        if [[ " ${seen[@]} " =~ " ${dir_path} " ]]; then
             continue
         fi
 
         # Skip if directory no longer exists
-        if [ ! -d "$path" ]; then
+        if [ ! -d "$dir_path" ]; then
             continue
         fi
 
         ((count++))
-        seen+=("$path")
+        seen+=("$dir_path")
 
         # Format timestamp
         if command -v /bin/date &> /dev/null; then
@@ -112,8 +123,8 @@ __goto_list_recent() {
             time_ago="$timestamp"
         fi
 
-        printf "  \033[1;36m%-3s\033[0m %s\n" "$count)" "$(/usr/bin/basename "$path")"
-        printf "      → %s\n" "$path"
+        printf "  \033[1;36m%-3s\033[0m %s\n" "$count)" "$(/usr/bin/basename "$dir_path")"
+        printf "      → %s\n" "$dir_path"
         printf "      📅 Last visited: %s\n" "$time_ago"
         echo ""
 
