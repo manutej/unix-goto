@@ -145,7 +145,7 @@ __goto_cache_lookup() {
     # Use grep for fast lookup (simulates hash table)
     local matches=()
 
-    # Use process substitution to avoid subshell (preserves array modifications)
+    # First try exact match
     while IFS='|' read -r cached_name cached_path cached_depth cached_mtime; do
         # Skip comment lines
         if [[ "$cached_name" == \#* ]]; then
@@ -164,6 +164,28 @@ __goto_cache_lookup() {
             fi
         fi
     done < <(grep "^$folder_name|" "$GOTO_INDEX_FILE" 2>/dev/null)
+
+    # If no exact matches, try partial match (contains search term)
+    if [ ${#matches[@]} -eq 0 ]; then
+        while IFS='|' read -r cached_name cached_path cached_depth cached_mtime; do
+            # Skip comment lines
+            if [[ "$cached_name" == \#* ]]; then
+                continue
+            fi
+
+            # Trim whitespace
+            cached_name=$(echo "$cached_name" | xargs)
+            cached_path=$(echo "$cached_path" | xargs)
+
+            # Partial match - folder name contains search term
+            if [[ "$cached_name" == *"$folder_name"* ]]; then
+                # Verify folder still exists
+                if [ -d "$cached_path" ]; then
+                    matches+=("$cached_path")
+                fi
+            fi
+        done < <(grep -i "$folder_name" "$GOTO_INDEX_FILE" 2>/dev/null | grep -v '^#')
+    fi
 
     # Return results
     if [ ${#matches[@]} -eq 0 ]; then

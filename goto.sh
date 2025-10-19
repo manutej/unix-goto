@@ -2,7 +2,14 @@
 # unix-goto - Single file loader
 # Usage: source /path/to/unix-goto/goto.sh
 
-GOTO_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/lib" 2>/dev/null && pwd)"
+# Shell-agnostic path resolution (works in both bash and zsh)
+if [ -n "${BASH_SOURCE[0]}" ]; then
+    # Bash
+    GOTO_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/lib" 2>/dev/null && pwd)"
+else
+    # Zsh uses a different mechanism
+    GOTO_LIB_DIR="$(cd "$(dirname "${(%):-%x}")/lib" 2>/dev/null && pwd)"
+fi
 
 # Verify lib directory exists
 if [ ! -d "$GOTO_LIB_DIR" ]; then

@@ -196,6 +196,21 @@ goto() {
             ;;
     esac
 
+    # Validate single argument for directory navigation
+    # (multi-word directories should use hyphens: unix-goto, not "unix goto")
+    if [ $# -gt 1 ]; then
+        local hyphenated_arg="${1}-${2}"
+
+        echo "⚠️  Multiple arguments detected: '$*'"
+        echo ""
+        echo "For multi-word directory names, use hyphens or quotes:"
+        echo "  ✓ goto unix-goto"
+        echo "  ✓ goto 'unix goto'  (if directory name has spaces)"
+        echo ""
+        echo "Did you mean: goto $hyphenated_arg ?"
+        return 1
+    fi
+
     # Search paths for direct folder matching
     # Customize these paths for your environment
     local search_paths=(
@@ -273,14 +288,27 @@ goto() {
     echo "🔍 Searching in subdirectories (cache miss)..."
 
     local matches=()
+
+    # First try exact match across all search paths
     for base_path in "${search_paths[@]}"; do
         if [ -d "$base_path" ]; then
-            # Find all directories matching the name (max depth 3 for performance)
             while IFS= read -r match; do
                 matches+=("$match")
             done < <(/usr/bin/find "$base_path" -maxdepth 3 -type d -name "$1" 2>/dev/null)
         fi
     done
+
+    # If no exact matches found, try partial match (contains search term)
+    if [ ${#matches[@]} -eq 0 ]; then
+        echo "🔍 No exact match, trying partial match..."
+        for base_path in "${search_paths[@]}"; do
+            if [ -d "$base_path" ]; then
+                while IFS= read -r match; do
+                    matches+=("$match")
+                done < <(/usr/bin/find "$base_path" -maxdepth 3 -type d -name "*$1*" 2>/dev/null)
+            fi
+        done
+    fi
 
     # Check results
     if [ ${#matches[@]} -eq 0 ]; then
