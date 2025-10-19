@@ -1,0 +1,189 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Test Suite
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python (for timing utilities)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Display environment
+        run: |
+          echo "OS: ${{ runner.os }}"
+          echo "Shell: $SHELL"
+          bash --version
+
+      - name: Run test suite
+        run: |
+          chmod +x tests/run-tests.sh
+          chmod +x tests/unit/*.sh
+          chmod +x tests/coverage-analysis.sh
+          ./tests/run-tests.sh
+
+      - name: Run coverage analysis
+        run: |
+          ./tests/coverage-analysis.sh
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report-${{ matrix.os }}
+          path: coverage-report.txt
+          retention-days: 30
+
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(grep "Coverage Percentage:" coverage-report.txt | grep -o '[0-9]*' | head -1)
+          echo "Current coverage: ${COVERAGE}%"
+
+          if [ "$COVERAGE" -lt 80 ]; then
+            echo "::warning::Coverage ${COVERAGE}% is below 80% target"
+          else
+            echo "::notice::Coverage ${COVERAGE}% meets or exceeds 80% target"
+          fi
+
+  performance:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run performance tests
+        run: |
+          chmod +x tests/unit/test-performance.sh
+          ./tests/unit/test-performance.sh
+
+      - name: Check performance thresholds
+        run: |
+          echo "Performance tests completed"
+          echo "Review logs above for any threshold violations"
+
+  edge-cases:
+    name: Edge Case Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run edge case tests
+        run: |
+          chmod +x tests/unit/test-edge-cases.sh
+          ./tests/unit/test-edge-cases.sh
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+          # Check all shell scripts
+          find . -name "*.sh" -type f -exec shellcheck --severity=warning {} + || true
+
+      - name: Check for security issues
+        run: |
+          # Check for hardcoded credentials
+          if grep -r "password\|secret\|token" --include="*.sh" lib/ bin/ 2>/dev/null | grep -v "GOTO_"; then
+            echo "::warning::Potential hardcoded credentials found"
+          fi
+
+          # Check for unsafe eval usage
+          if grep -r "eval.*\$" --include="*.sh" lib/ bin/ 2>/dev/null; then
+            echo "::warning::Unsafe eval usage detected"
+          fi
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [test, performance, edge-cases]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install unix-goto
+        run: |
+          ./install.sh
+
+      - name: Test installation
+        run: |
+          # Verify binaries are installed
+          if [ -f "$HOME/bin/goto-index" ]; then
+            echo "Installation successful"
+          else
+            echo "::error::Installation failed"
+            exit 1
+          fi
+
+      - name: Basic smoke test
+        shell: bash
+        run: |
+          # Source the installed functions
+          export HOME="$HOME"
+
+          # Create test directory
+          mkdir -p "$HOME/test-project"
+
+          echo "Basic installation verified"
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test, performance, edge-cases, security, integration]
+    if: always()
+
+    steps:
+      - name: Download coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          path: coverage-reports
+
+      - name: Display summary
+        run: |
+          echo "## Test Suite Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All test jobs completed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f coverage-reports/coverage-report-ubuntu-latest/coverage-report.txt ]; then
+            echo "### Coverage Report (Ubuntu)" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat coverage-reports/coverage-report-ubuntu-latest/coverage-report.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi

@@ -1,0 +1,265 @@
+#!/usr/bin/env bash
+# finddir - Natural language directory search
+# Usage: finddir "python projects from last month"
+
+# Search paths (same as goto)
+FINDDIR_SEARCH_PATHS=(
+    "$HOME/ASCIIDocs"
+    "$HOME/Documents/LUXOR"
+    "$HOME/Documents/LUXOR/PROJECTS"
+)
+
+# Default result limit
+FINDDIR_LIMIT="${FINDDIR_LIMIT:-20}"
+
+# Show help
+if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]] || [ -z "$1" ]; then
+    echo "finddir - Natural language directory search"
+    echo ""
+    echo "Usage:"
+    echo "  finddir <query>          Search using natural language"
+    echo "  finddir --help           Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  finddir \"python projects from last month\""
+    echo "  finddir \"folders with git repositories\""
+    echo "  finddir \"large directories over 1GB\""
+    echo "  finddir \"projects modified this week\""
+    echo "  finddir \"node projects with package.json\""
+    echo "  finddir \"projects like halcon\""
+    echo ""
+    echo "Search criteria:"
+    echo "  Time: last day/week/month, modified/created, in 2024"
+    echo "  Content: python/node/git projects, with files, extensions"
+    echo "  Size: over/under SIZE (e.g., 1GB, 500MB)"
+    echo "  Name: like PATTERN, containing WORD"
+    echo ""
+    echo "Options:"
+    echo "  --all                Show all results (no limit)"
+    echo "  --limit N            Show N results (default: 20)"
+    echo ""
+    exit 0
+fi
+
+# Handle options
+SHOW_ALL=false
+if [[ "$1" == "--all" ]]; then
+    SHOW_ALL=true
+    shift
+fi
+
+if [[ "$1" == "--limit" ]]; then
+    FINDDIR_LIMIT="$2"
+    shift 2
+fi
+
+# Get the query
+QUERY="$*"
+
+if [ -z "$QUERY" ]; then
+    echo "❌ Error: No search query provided"
+    echo "Try: finddir --help"
+    exit 1
+fi
+
+echo "🔍 Searching for: \"$QUERY\""
+echo ""
+
+# Find finddir-resolver
+RESOLVER=""
+if command -v finddir-resolver &> /dev/null; then
+    RESOLVER="finddir-resolver"
+elif [ -f "$HOME/bin/finddir-resolver" ]; then
+    RESOLVER="$HOME/bin/finddir-resolver"
+elif [ -f "$(dirname "$0")/finddir-resolver" ]; then
+    RESOLVER="$(dirname "$0")/finddir-resolver"
+else
+    echo "❌ Error: finddir-resolver not found"
+    echo "Please ensure unix-goto is properly installed"
+    exit 1
+fi
+
+# Parse query using Claude AI
+echo "🤖 Parsing search criteria..."
+CRITERIA=$($RESOLVER "$QUERY" 2>/dev/null)
+
+if [ -z "$CRITERIA" ] || [ "$CRITERIA" == "null" ]; then
+    echo "⚠️  Could not understand search criteria"
+    echo "Try: finddir \"python projects from last month\""
+    exit 1
+fi
+
+echo "✓ Search criteria parsed"
+echo ""
+
+# Build find command based on criteria
+FIND_CMD="find"
+FIND_ARGS=()
+
+# Add search paths
+for path in "${FINDDIR_SEARCH_PATHS[@]}"; do
+    if [ -d "$path" ]; then
+        FIND_ARGS+=("$path")
+    fi
+done
+
+# Add search criteria
+FIND_ARGS+=("-type" "d")
+
+# Parse JSON and build find arguments
+# Time criteria
+TIME_RANGE=$(echo "$CRITERIA" | grep -o '"range":"[^"]*"' | cut -d'"' -f4)
+if [ -n "$TIME_RANGE" ]; then
+    case "$TIME_RANGE" in
+        last_day)
+            FIND_ARGS+=("-mtime" "-1")
+            ;;
+        last_week)
+            FIND_ARGS+=("-mtime" "-7")
+            ;;
+        last_month)
+            FIND_ARGS+=("-mtime" "-30")
+            ;;
+        last_year)
+            FIND_ARGS+=("-mtime" "-365")
+            ;;
+    esac
+fi
+
+# Name criteria
+NAME_CONTAINS=$(echo "$CRITERIA" | grep -o '"contains":"[^"]*"' | cut -d'"' -f4)
+if [ -n "$NAME_CONTAINS" ]; then
+    FIND_ARGS+=("-iname" "*${NAME_CONTAINS}*")
+fi
+
+# Content criteria - check for specific files
+HAS_GIT=$(echo "$CRITERIA" | grep -o '"has_git":true')
+PROJECT_TYPE=$(echo "$CRITERIA" | grep -o '"project_type":"[^"]*"' | cut -d'"' -f4)
+
+# Maximum depth for performance
+FIND_ARGS+=("-maxdepth" "5")
+
+# Execute find
+echo "📁 Searching directories..."
+RESULTS=()
+while IFS= read -r dir; do
+    # Skip if empty
+    [ -z "$dir" ] && continue
+
+    # Apply content filters
+    MATCH=true
+
+    # Check for git
+    if [ -n "$HAS_GIT" ]; then
+        if [ ! -d "$dir/.git" ]; then
+            MATCH=false
+        fi
+    fi
+
+    # Check project type
+    if [ -n "$PROJECT_TYPE" ]; then
+        case "$PROJECT_TYPE" in
+            python)
+                if [ ! -f "$dir/requirements.txt" ] && [ ! -f "$dir/setup.py" ] && [ ! -f "$dir/pyproject.toml" ]; then
+                    # Check for .py files
+                    if ! /usr/bin/find "$dir" -maxdepth 2 -name "*.py" -type f 2>/dev/null | grep -q .; then
+                        MATCH=false
+                    fi
+                fi
+                ;;
+            node)
+                if [ ! -f "$dir/package.json" ]; then
+                    MATCH=false
+                fi
+                ;;
+            go)
+                if [ ! -f "$dir/go.mod" ]; then
+                    MATCH=false
+                fi
+                ;;
+            rust)
+                if [ ! -f "$dir/Cargo.toml" ]; then
+                    MATCH=false
+                fi
+                ;;
+        esac
+    fi
+
+    if [ "$MATCH" == "true" ]; then
+        RESULTS+=("$dir")
+    fi
+done < <($FIND_CMD "${FIND_ARGS[@]}" 2>/dev/null | /usr/bin/sort)
+
+# Display results
+RESULT_COUNT=${#RESULTS[@]}
+
+if [ $RESULT_COUNT -eq 0 ]; then
+    echo "❌ No directories found matching criteria"
+    echo ""
+    echo "Try:"
+    echo "  - Broader search: finddir \"projects from last year\""
+    echo "  - Different criteria: finddir \"folders with git\""
+    exit 0
+fi
+
+echo "✓ Found $RESULT_COUNT matching $([ $RESULT_COUNT -eq 1 ] && echo 'directory' || echo 'directories')"
+echo ""
+
+# Limit results if needed
+DISPLAY_COUNT=$RESULT_COUNT
+if [ "$SHOW_ALL" != "true" ] && [ $RESULT_COUNT -gt $FINDDIR_LIMIT ]; then
+    DISPLAY_COUNT=$FINDDIR_LIMIT
+fi
+
+# Display results with details
+for i in $(seq 0 $((DISPLAY_COUNT - 1))); do
+    dir="${RESULTS[$i]}"
+    num=$((i + 1))
+
+    # Get directory info
+    dir_name=$(basename "$dir")
+
+    # Get modification time
+    if [ -d "$dir" ]; then
+        mod_time=$(/usr/bin/stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$dir" 2>/dev/null || echo "unknown")
+    else
+        mod_time="unknown"
+    fi
+
+    # Get size (approximate)
+    size=$(/usr/bin/du -sh "$dir" 2>/dev/null | /usr/bin/cut -f1 || echo "unknown")
+
+    # Print result
+    echo "  $num) $dir_name"
+    echo "     → $dir"
+    echo "     📅 Modified: $mod_time  💾 Size: $size"
+
+    # Show project type indicators
+    if [ -f "$dir/.git/config" ]; then
+        echo "     🔧 Git repository"
+    fi
+    if [ -f "$dir/package.json" ]; then
+        echo "     📦 Node.js project"
+    fi
+    if [ -f "$dir/requirements.txt" ] || [ -f "$dir/setup.py" ]; then
+        echo "     🐍 Python project"
+    fi
+    if [ -f "$dir/Cargo.toml" ]; then
+        echo "     🦀 Rust project"
+    fi
+    if [ -f "$dir/go.mod" ]; then
+        echo "     🐹 Go project"
+    fi
+
+    echo ""
+done
+
+# Show pagination info
+if [ "$SHOW_ALL" != "true" ] && [ $RESULT_COUNT -gt $FINDDIR_LIMIT ]; then
+    REMAINING=$((RESULT_COUNT - FINDDIR_LIMIT))
+    echo "... and $REMAINING more result$([ $REMAINING -eq 1 ] && echo '' || echo 's')"
+    echo "Use 'finddir --all \"$QUERY\"' to see all results"
+    echo ""
+fi
+
+echo "💡 Tip: Use 'goto <name>' to navigate to any of these directories"
