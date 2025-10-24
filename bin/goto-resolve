@@ -51,8 +51,13 @@ Example queries and responses:
 - 'luxor root' -> luxor
 - 'work assignment 3590' -> WA3590"
 
-# Call Claude with the query
-RESPONSE=$(/Users/manu/.claude/local/claude --print --model claude-3-5-sonnet-20241022 --append-system-prompt "$SYSTEM_PROMPT" "$QUERY" 2>/dev/null)
+# Call Claude with the query (use 'claude' command from PATH/alias)
+if ! command -v claude &> /dev/null; then
+    echo "Error: Claude CLI not found in PATH" >&2
+    exit 1
+fi
+
+RESPONSE=$(claude --print --model claude-3-5-sonnet-20241022 --append-system-prompt "$SYSTEM_PROMPT" "$QUERY" 2>/dev/null)
 
 # Extract just the folder name (first line, trimmed)
 FOLDER=$(echo "$RESPONSE" | head -1 | tr -d '[:space:]' | tr -d '"' | tr -d "'")

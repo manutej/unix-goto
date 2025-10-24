@@ -92,10 +92,15 @@ __goto_bookmark_list() {
     echo ""
 
     local count=0
-    while IFS='|' read -r name path timestamp; do
+    while read -r line; do
+        # Parse line manually to avoid IFS issues
+        local bm_name="${line%%|*}"
+        local rest="${line#*|}"
+        local bm_path="${rest%%|*}"
+
         ((count++))
         # Format with colors
-        printf "  \033[1;36m%-20s\033[0m → %s\n" "$name" "$path"
+        printf "  \033[1;36m%-20s\033[0m → %s\n" "$bm_name" "$bm_path"
     done < "$GOTO_BOOKMARKS_FILE"
 
     echo ""
