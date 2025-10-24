@@ -6,13 +6,22 @@
 __goto_navigate_to() {
     local target_dir="$1"
 
+    # Verify target directory exists before attempting navigation
+    if [ ! -d "$target_dir" ]; then
+        echo "❌ Error: Directory not found: $target_dir" >&2
+        return 1
+    fi
+
     # Push current directory to stack before navigating
     if command -v __goto_stack_push &> /dev/null; then
         __goto_stack_push "$PWD"
     fi
 
-    # Navigate
-    cd "$target_dir"
+    # Navigate with error checking
+    if ! cd "$target_dir" 2>/dev/null; then
+        echo "❌ Error: Failed to navigate to: $target_dir" >&2
+        return 1
+    fi
 
     # Track in history
     if command -v __goto_track &> /dev/null; then
@@ -20,6 +29,7 @@ __goto_navigate_to() {
     fi
 
     echo "→ $PWD"
+    return 0
 }
 
 # Quick project navigation with natural language support
@@ -34,35 +44,60 @@ goto() {
         echo "  goto <unique-name>       Find and navigate to uniquely named folder"
         echo "  goto @<bookmark>         Navigate to bookmarked location"
         echo "  goto ~                   Return to home directory"
-        echo "  goto zshrc               Source and display .zshrc"
-        echo "  goto list                List all available destinations"
+        echo ""
+        echo "Core Commands:"
+        echo "  goto list [options]      List available destinations"
+        echo "  goto index <cmd>         Manage folder cache index"
+        echo "  goto benchmark [cmd]     Run performance benchmarks"
         echo "  goto --help              Show this help"
         echo ""
-        echo "Direct shortcuts:"
+        echo "Direct Shortcuts:"
         echo "  luxor                    LUXOR root"
         echo "  halcon                   HALCON project"
         echo "  docs                     ASCIIDocs root"
         echo "  infra                    ASCIIDocs/infra"
+        echo "  zshrc                    Source and display ~/.zshrc"
+        echo "  bashrc                   Source and display ~/.bashrc"
         echo ""
-        echo "Folder names:"
-        echo "  GAI-3101, WA3590, etc.   Any subfolder in search paths"
-        echo ""
-        echo "Multi-level navigation:"
-        echo "  GAI-3101/docs            Navigate to nested folders"
-        echo "  LUXOR/Git_Repos/unix-goto  Full path navigation"
-        echo ""
-        echo "Smart search (recursively finds unique folders):"
-        echo "  unix-goto                Finds LUXOR/Git_Repos/unix-goto"
-        echo "  If multiple matches, shows options"
+        echo "Smart Features:"
+        echo "  Cache Lookup             O(1) fast navigation (8x faster)"
+        echo "  Multi-level Paths        goto GAI-3101/docs"
+        echo "  Recursive Search         Finds nested folders up to 3 levels"
+        echo "  Natural Language         'the halcon project' (powered by Claude)"
         echo ""
         echo "Bookmarks:"
-        echo "  @work, @proj1, etc.      Saved bookmark locations"
-        echo "  Use 'bookmark --help' for bookmark management"
+        echo "  @work, @proj1, etc.      Quick access to saved locations"
+        echo "  bookmark add <name>      Save current directory"
+        echo "  bookmark list            Show all bookmarks"
+        echo "  bookmark goto <name>     Navigate to bookmark"
+        echo "  bookmark --help          Full bookmark management"
         echo ""
-        echo "Natural language (powered by Claude):"
-        echo "  'the halcon project'"
-        echo "  'infrastructure folder'"
-        echo "  'that GAI project from March'"
+        echo "Navigation History:"
+        echo "  back                     Go to previous directory"
+        echo "  back <N>                 Go back N directories"
+        echo "  recent                   Show recently visited folders"
+        echo "  recent --goto <N>        Navigate to Nth recent folder"
+        echo ""
+        echo "Cache Management:"
+        echo "  goto index rebuild       Build/rebuild cache index"
+        echo "  goto index status        Show cache statistics"
+        echo "  goto index clear         Clear cache"
+        echo "  goto index --help        Full cache commands"
+        echo ""
+        echo "Performance:"
+        echo "  goto benchmark           Run performance tests"
+        echo "  goto benchmark compare   Compare cache vs search"
+        echo "  goto benchmark --help    Full benchmark options"
+        echo ""
+        echo "Examples:"
+        echo "  goto unix-goto           Find and navigate to unix-goto folder"
+        echo "  goto Git_Repos/unix-goto Navigate using multi-level path"
+        echo "  goto @work               Navigate to 'work' bookmark"
+        echo "  goto 'the halcon folder' Natural language navigation"
+        echo "  back                     Return to previous directory"
+        echo "  recent --goto 3          Go to 3rd recent folder"
+        echo ""
+        echo "For more: https://github.com/manutej/unix-goto"
         echo ""
         return
     fi
@@ -84,6 +119,16 @@ goto() {
         return
     fi
 
+    # Check regular bookmarks (without @ prefix) before searching
+    if command -v __goto_bookmark_get &> /dev/null; then
+        local bookmark_path=$(__goto_bookmark_get "$1" 2>/dev/null)
+        if [ -n "$bookmark_path" ] && [ -d "$bookmark_path" ]; then
+            echo "✓ Using bookmark: $1"
+            __goto_navigate_to "$bookmark_path"
+            return 0
+        fi
+    fi
+
     # Handle special cases
     case "$1" in
         list)
@@ -91,6 +136,24 @@ goto() {
                 __goto_list "$2"
             else
                 echo "⚠️  List command not loaded"
+            fi
+            return
+            ;;
+        index)
+            if command -v __goto_index_command &> /dev/null; then
+                shift
+                __goto_index_command "$@"
+            else
+                echo "⚠️  Index/cache command not loaded"
+            fi
+            return
+            ;;
+        benchmark|bench)
+            if command -v __goto_benchmark &> /dev/null; then
+                shift
+                __goto_benchmark "$@"
+            else
+                echo "⚠️  Benchmark command not loaded"
             fi
             return
             ;;
@@ -133,6 +196,21 @@ goto() {
             ;;
     esac
 
+    # Validate single argument for directory navigation
+    # (multi-word directories should use hyphens: unix-goto, not "unix goto")
+    if [ $# -gt 1 ]; then
+        local hyphenated_arg="${1}-${2}"
+
+        echo "⚠️  Multiple arguments detected: '$*'"
+        echo ""
+        echo "For multi-word directory names, use hyphens or quotes:"
+        echo "  ✓ goto unix-goto"
+        echo "  ✓ goto 'unix goto'  (if directory name has spaces)"
+        echo ""
+        echo "Did you mean: goto $hyphenated_arg ?"
+        return 1
+    fi
+
     # Search paths for direct folder matching
     # Customize these paths for your environment
     local search_paths=(
@@ -168,6 +246,33 @@ goto() {
         return 1
     fi
 
+    # NEW: Try cache lookup first (O(1) performance)
+    if command -v __goto_cache_lookup &> /dev/null; then
+        local cache_result
+        cache_result=$(__goto_cache_lookup "$1" 2>/dev/null)
+        local lookup_status=$?
+
+        if [ $lookup_status -eq 0 ]; then
+            # Single match found in cache
+            echo "✓ Found in cache: $cache_result"
+            __goto_navigate_to "$cache_result"
+            return 0
+        elif [ $lookup_status -eq 2 ]; then
+            # Multiple matches in cache
+            echo "⚠️  Multiple folders named '$1' found in cache:"
+            echo ""
+            local i=1
+            while IFS= read -r match; do
+                echo "  $i) $match"
+                ((i++))
+            done <<< "$cache_result"
+            echo ""
+            echo "Please be more specific or use the full path"
+            return 1
+        fi
+        # If cache lookup failed (status 1), fall through to regular search
+    fi
+
     # Try direct folder match at root level first
     local target_dir
     for base_path in "${search_paths[@]}"; do
@@ -180,17 +285,30 @@ goto() {
 
     # If not found at root level, search recursively for unique folder names
     # This allows: goto unix-goto (finds LUXOR/Git_Repos/unix-goto)
-    echo "🔍 Searching in subdirectories..."
+    echo "🔍 Searching in subdirectories (cache miss)..."
 
     local matches=()
+
+    # First try exact match across all search paths
     for base_path in "${search_paths[@]}"; do
         if [ -d "$base_path" ]; then
-            # Find all directories matching the name (max depth 3 for performance)
             while IFS= read -r match; do
                 matches+=("$match")
             done < <(/usr/bin/find "$base_path" -maxdepth 3 -type d -name "$1" 2>/dev/null)
         fi
     done
+
+    # If no exact matches found, try partial match (contains search term)
+    if [ ${#matches[@]} -eq 0 ]; then
+        echo "🔍 No exact match, trying partial match..."
+        for base_path in "${search_paths[@]}"; do
+            if [ -d "$base_path" ]; then
+                while IFS= read -r match; do
+                    matches+=("$match")
+                done < <(/usr/bin/find "$base_path" -maxdepth 3 -type d -name "*$1*" 2>/dev/null)
+            fi
+        done
+    fi
 
     # Check results
     if [ ${#matches[@]} -eq 0 ]; then

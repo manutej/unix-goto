@@ -24,8 +24,13 @@ __goto_list_all() {
     # Show bookmarks
     if [ "$show_bookmarks" = "true" ] && [ -f "$GOTO_BOOKMARKS_FILE" ] && [ -s "$GOTO_BOOKMARKS_FILE" ]; then
         echo "  \033[1;36m🔖 Bookmarks:\033[0m"
-        while IFS='|' read -r name path timestamp; do
-            printf "     @%-10s → %s\n" "$name" "$path"
+        while read -r line; do
+            # Parse line manually to avoid IFS issues
+            local bm_name="${line%%|*}"
+            local rest="${line#*|}"
+            local bm_path="${rest%%|*}"
+
+            printf "     @%-10s → %s\n" "$bm_name" "$bm_path"
         done < "$GOTO_BOOKMARKS_FILE"
         echo ""
     fi
@@ -68,9 +73,81 @@ __goto_list_all() {
     echo ""
 }
 
+# Show recent folders from history
+__goto_list_recent() {
+    local limit="${1:-10}"
+
+    if [ ! -f "$GOTO_HISTORY_FILE" ] || [ ! -s "$GOTO_HISTORY_FILE" ]; then
+        echo "No recent folders yet."
+        echo "Navigate using 'goto' to build history."
+        return
+    fi
+
+    echo "📂 Recently Visited Folders:"
+    echo ""
+
+    local count=0
+    local seen=()
+
+    # Read history in reverse (most recent first) and get unique folders
+    if command -v tac &> /dev/null; then
+        history_reversed=$(tac "$GOTO_HISTORY_FILE")
+    else
+        history_reversed=$(/usr/bin/tail -r "$GOTO_HISTORY_FILE")
+    fi
+
+    # Process history in a while loop with IFS properly scoped
+    # Use process substitution to avoid IFS leaking to parent shell
+    while read -r line; do
+        # Parse line manually instead of using IFS
+        local timestamp="${line%%|*}"
+        local dir_path="${line#*|}"
+
+        # Skip if we've seen this path
+        if [[ " ${seen[@]} " =~ " ${dir_path} " ]]; then
+            continue
+        fi
+
+        # Skip if directory no longer exists
+        if [ ! -d "$dir_path" ]; then
+            continue
+        fi
+
+        ((count++))
+        seen+=("$dir_path")
+
+        # Format timestamp
+        if command -v /bin/date &> /dev/null; then
+            time_ago=$(/bin/date -r "$timestamp" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "unknown")
+        else
+            time_ago="$timestamp"
+        fi
+
+        printf "  \033[1;36m%-3s\033[0m %s\n" "$count)" "$(/usr/bin/basename "$dir_path")"
+        printf "      → %s\n" "$dir_path"
+        printf "      📅 Last visited: %s\n" "$time_ago"
+        echo ""
+
+        # Break if we've reached the limit
+        if [ $count -ge $limit ]; then
+            break
+        fi
+    done <<< "$history_reversed"
+
+    if [ $count -eq 0 ]; then
+        echo "No recent folders found."
+        return
+    fi
+
+    echo "Total: $count recent folder$([ $count -ne 1 ] && echo 's')"
+    echo ""
+    echo "💡 Use 'recent --goto N' to navigate to any of these"
+}
+
 # Handle goto list command
 __goto_list() {
     local filter="$1"
+    local arg2="$2"
 
     case "$filter" in
         --shortcuts|-s)
@@ -82,6 +159,14 @@ __goto_list() {
         --bookmarks|-b)
             __goto_list_all false false true
             ;;
+        --recent|-r)
+            # Allow optional limit: goto list --recent 20
+            local limit=10
+            if [ -n "$arg2" ] && [[ "$arg2" =~ ^[0-9]+$ ]]; then
+                limit=$arg2
+            fi
+            __goto_list_recent "$limit"
+            ;;
         --help|-h)
             echo "goto list - Show available destinations"
             echo ""
@@ -90,6 +175,8 @@ __goto_list() {
             echo "  goto list --shortcuts  Show only shortcuts"
             echo "  goto list --folders    Show only folders"
             echo "  goto list --bookmarks  Show only bookmarks"
+            echo "  goto list --recent     Show recently visited folders"
+            echo "  goto list --recent N   Show N recent folders"
             echo ""
             ;;
         "")

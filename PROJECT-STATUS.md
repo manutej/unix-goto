@@ -1,8 +1,8 @@
 # unix-goto Project Status
 
-**Last Updated:** 2025-10-08 (Post-Enhanced Navigation Merge)
+**Last Updated:** 2025-10-17 (Reprioritized for Speed & Usability)
 **Current Version:** v0.3.0 (Unreleased - master has changes)
-**Current Phase:** Phase 2.5 ✅ Complete → Critical Improvements Done
+**Current Phase:** Ready to begin Phase 3 - High-Performance Navigation
 
 ---
 
@@ -13,8 +13,9 @@
 | **Latest Release** | v0.2.0 (2025-10-07) |
 | **Latest Commit** | 3cdf089 - Merge PR #1 (enhanced navigation) |
 | **Workflow Status** | ✅ Branch protection enabled + PR workflow active |
-| **Phases Complete** | 2.5 of 6 (42%) - Critical improvements done |
+| **Phases Complete** | 2 of 8 (25%) - Foundation complete |
 | **Total Features** | 11 navigation modes implemented |
+| **Phase 3 Focus** | Speed & Usability (NO AI features) |
 | **Uncommitted Work** | Documentation updates (README, CHANGELOG, PROJECT-STATUS) |
 | **Next Milestone** | Tag v0.3.0 release |
 
@@ -96,27 +97,40 @@
 
 ---
 
-## ⏳ Next Phase: Phase 3 - Smart Search & Discovery
+## ⏳ Next Phase: Phase 3 - High-Performance Navigation (v0.4.0)
 
-### Primary Feature: `finddir` Command
-```bash
-finddir "projects from last month"
-finddir "folders with python code"
-finddir "large directories over 1GB"
-```
+**Focus:** Speed, usability, and scripting support - NO AI features
 
-**Implementation Plan:**
-1. Design search criteria grammar
-2. Claude AI interpretation layer
-3. Integration with find/fd commands
-4. Result ranking algorithm
-5. Output formatting
+### Priority 0 Features (Must Have)
+1. **Folder Index Caching System** 🔥
+   - Reduce navigation from ~2-5s to <100ms
+   - Cache in `~/.goto_index`
+   - Auto-refresh when stale
 
-### Enhanced `goto list` Features
-- ✅ Basic filtering already implemented
-- ⏳ Add `--recent` filter option
-- ⏳ Add sorting options (alpha, recent, size)
-- ⏳ Add search/filter by keyword
+2. **Quick Bookmark Current Directory** 🔥
+   - `bookmark .` or `bookmark here proj1`
+   - No need to type full path
+
+### Priority 1 Features (High Value)
+3. **Configurable Search Depth**
+   - `~/.gotorc` configuration file
+   - `goto --depth N` for one-time override
+   - Default: 3 (backward compatible)
+
+4. **Tab Completion for Bash/Zsh**
+   - Complete subcommands, bookmarks, folders
+   - Auto-install via install.sh
+
+5. **Batch-Friendly Output Modes**
+   - `goto list --format json|simple|csv`
+   - `goto --quiet` for scripting
+   - `goto pwd <target>` - print path without navigation
+   - `goto check <target>` - existence test
+
+6. **Execute Commands in Target Directory**
+   - `goto exec luxor "git status"`
+   - Return to original dir by default
+   - `--stay` flag to remain
 
 ---
 
@@ -261,16 +275,19 @@ tests/                      ⏳ Test suite (Technical Improvements)
 ## 📈 Progress Metrics
 
 ### By Phase
-- **Phase 1:** 100% ✅ (7/7 features)
-- **Phase 2:** 100% ✅ (5/5 features)
-- **Phase 3:** 0% ⏳ (0/2 features)
-- **Phase 4:** 0% ⏳ (0/3 features)
-- **Phase 5:** 0% ⏳ (0/3 features)
-- **Phase 6:** 0% ⏳ (0/3 features)
+- **Phase 1:** 100% ✅ Core Navigation (7/7 features)
+- **Phase 2:** 100% ✅ History & Bookmarks (5/5 features)
+- **Phase 3:** 0% ⏳ High-Performance Navigation (0/6 features)
+- **Phase 4:** 0% ⏳ Advanced Performance & UX (0/3 features)
+- **Phase 5:** 0% ⏳ Smart Search & Discovery (0/2 features)
+- **Phase 6:** 0% ⏳ Productivity Enhancements (0/2 features)
+- **Phase 7:** 0% ⏳ AI-Powered Features (0/3 features)
+- **Phase 8:** 0% ⏳ Integration & Ecosystem (0/3 features)
 
 ### Overall
-- **Total Phases:** 2/6 complete (33%)
-- **Total Features:** 12/23 planned features (52%)
+- **Total Phases:** 2/8 complete (25%)
+- **Foundation Complete:** ✅ Core navigation + history/bookmarks
+- **Next Milestone:** v0.4.0 - High-performance features
 - **Commands Implemented:** 9 (goto, back, recent, bookmark, bm, list + specials)
 
 ---
@@ -333,11 +350,18 @@ Initial release with:
    - Intuitive, familiar from social media
    - No conflicts with folder names
 
-### Success Criteria for Phase 3
-- [ ] `finddir` handles natural language queries accurately
-- [ ] Search integrates with find/fd for performance
-- [ ] Results ranked by relevance/recency
-- [ ] User can discover folders they forgot about
+### Success Criteria for Phase 3 (High-Performance Navigation)
+- [ ] Folder caching reduces navigation to <100ms
+- [ ] Quick bookmarking workflow (`bookmark .`) implemented
+- [ ] `~/.gotorc` configuration file support
+- [ ] Tab completion working in bash and zsh
+- [ ] Batch modes enable scripting integration
+- [ ] `goto exec` command working reliably
+
+### Success Criteria for Phase 4 (Advanced Performance)
+- [ ] Parallel search reduces time by ~50%
+- [ ] Fuzzy matching finds folders with typos
+- [ ] Benchmark suite tracks performance improvements
 
 ---
 

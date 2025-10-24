@@ -34,3 +34,9 @@ test/
 # Local configuration
 .env
 .config.local
+
+# Development tools
+.claude/
+
+# Archive directory (old code and sessions)
+archive/
