@@ -17,6 +17,12 @@ __goto_bookmark_add() {
     local name="$1"
     local path="${2:-$PWD}"
 
+    # Handle "." as name - use current folder basename
+    if [ "$name" = "." ]; then
+        name=$(/usr/bin/basename "$PWD")
+        echo "💡 Using current folder name: $name"
+    fi
+
     # Validate bookmark name
     if [ -z "$name" ]; then
         echo "❌ Error: Bookmark name required"
@@ -150,6 +156,17 @@ bookmark() {
         add|a)
             __goto_bookmark_add "$@"
             ;;
+        here|h)
+            # Convenience: bookmark current directory
+            # Usage: bookmark here <name>
+            if [ -z "$1" ]; then
+                # No name provided - use current folder name
+                __goto_bookmark_add "." "$PWD"
+            else
+                # Name provided - bookmark current dir with that name
+                __goto_bookmark_add "$1" "$PWD"
+            fi
+            ;;
         remove|rm|delete|del)
             __goto_bookmark_remove "$@"
             ;;
@@ -164,6 +181,8 @@ bookmark() {
             echo ""
             echo "Usage:"
             echo "  bookmark add <name> [path]    Add bookmark (defaults to current dir)"
+            echo "  bookmark .                    Bookmark current dir (auto-name)"
+            echo "  bookmark here [name]          Bookmark current dir (optional name)"
             echo "  bookmark rm <name>            Remove bookmark"
             echo "  bookmark list                 List all bookmarks"
             echo "  bookmark goto <name>          Navigate to bookmark"
@@ -172,7 +191,12 @@ bookmark() {
             echo "Shortcuts:"
             echo "  goto @<name>                  Navigate using @ prefix"
             echo ""
-            echo "Examples:"
+            echo "Quick Bookmark Examples:"
+            echo "  bookmark .                    # Auto-name using folder: 'unix-goto'"
+            echo "  bookmark here                 # Same as 'bookmark .'"
+            echo "  bookmark here work            # Bookmark current dir as 'work'"
+            echo ""
+            echo "Standard Examples:"
             echo "  bookmark add work             # Bookmark current directory as 'work'"
             echo "  bookmark add proj1 ~/code/p1  # Bookmark specific path"
             echo "  bookmark list                 # Show all bookmarks"
@@ -180,6 +204,10 @@ bookmark() {
             echo "  goto @work                    # Navigate using @ syntax"
             echo "  bookmark rm work              # Remove bookmark"
             echo ""
+            ;;
+        .)
+            # Special shorthand: bookmark .
+            __goto_bookmark_add "." "$PWD"
             ;;
         *)
             echo "❌ Unknown command: $command"

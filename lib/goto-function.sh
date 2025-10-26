@@ -196,6 +196,22 @@ goto() {
             ;;
     esac
 
+    # LUXOR Project Navigation Integration
+    # Support for all 36 LUXOR projects (core systems, projects, git repos, work streams)
+    # Examples: goto mercurio, goto halcon, goto unix-goto, goto research-plan-dsl
+    if [ -f "$HOME/Documents/LUXOR/Git_Repos/unix-goto/lib/luxor-shortcuts.sh" ]; then
+        source "$HOME/Documents/LUXOR/Git_Repos/unix-goto/lib/luxor-shortcuts.sh" 2>/dev/null
+
+        # Try to resolve as a LUXOR project
+        if command -v __goto_resolve_luxor_project &> /dev/null; then
+            local luxor_path=$(__goto_resolve_luxor_project "$1" 2>/dev/null)
+            if [ -n "$luxor_path" ] && [ -d "$luxor_path" ]; then
+                __goto_navigate_to "$luxor_path"
+                return $?
+            fi
+        fi
+    fi
+
     # Validate single argument for directory navigation
     # (multi-word directories should use hyphens: unix-goto, not "unix goto")
     if [ $# -gt 1 ]; then
