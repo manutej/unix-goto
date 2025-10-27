@@ -8,9 +8,9 @@ REPO_DIR="$SCRIPT_DIR/../.."
 # Load test helpers
 source "$SCRIPT_DIR/../test-helpers.sh"
 
-# Load modules under test
-source "$REPO_DIR/lib/benchmark-command.sh"
-source "$REPO_DIR/lib/benchmark-workspace.sh" 2>/dev/null || true
+# Load modules under test (benchmarks moved to dev-tools)
+source "$REPO_DIR/dev-tools/benchmarks/benchmark-command.sh"
+source "$REPO_DIR/dev-tools/benchmarks/benchmark-workspace.sh" 2>/dev/null || true
 
 # Test suite entry point
 main() {
