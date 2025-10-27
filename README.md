@@ -211,42 +211,80 @@ goto benchmark workspace clean         # Remove test workspace
 
 ## Configuration
 
-### Current Configuration (v0.3.0)
+unix-goto is fully configurable to adapt to any user's directory structure. Configuration is done via the `~/.gotorc` file.
 
-The `goto` function searches in these locations by default:
-- `$HOME/ASCIIDocs`
-- `$HOME/Documents/LUXOR`
-- `$HOME/Documents/LUXOR/PROJECTS`
+### Quick Setup
 
-To customize search paths, edit `lib/goto-function.sh` and update the `search_paths` array:
-
+1. Copy the example configuration:
 ```bash
-local search_paths=(
-    "$HOME/your/custom/path"
-    "$HOME/another/path"
-)
+cp .gotorc.example ~/.gotorc
 ```
 
-### Coming in Phase 1 (v0.4.0)
-
-**~/.gotorc Configuration File** - User-level configuration with no source file editing required:
-
+2. Edit `~/.gotorc` to add your project directories:
 ```bash
-# ~/.gotorc example
-GOTO_SEARCH_DEPTH=5              # Default search depth (currently hard-coded at 3)
-GOTO_CACHE_TTL=86400             # Cache refresh time (24 hours)
-GOTO_SEARCH_PATHS=(              # Custom search paths
+# Define your project directories
+GOTO_SEARCH_PATHS=(
     "$HOME/projects"
     "$HOME/work"
+    "$HOME/Documents"
+)
+
+# Define custom shortcuts (optional)
+declare -A GOTO_SHORTCUTS
+GOTO_SHORTCUTS[work]="$HOME/work"
+GOTO_SHORTCUTS[docs]="$HOME/Documents"
+```
+
+3. Reload your shell and rebuild the cache:
+```bash
+source ~/.zshrc  # or source ~/.bashrc
+goto index rebuild
+```
+
+### Configuration Options
+
+**Search Paths** - Define directories to search (the "seed directories"):
+```bash
+GOTO_SEARCH_PATHS=(
+    "$HOME/projects"
+    "$HOME/work"
+    "$HOME/Documents"
 )
 ```
 
-Manage configuration with `goto config` commands:
+**Custom Shortcuts** - Quick navigation to frequently used directories:
 ```bash
-goto config                      # Show current configuration
-goto config set depth 4          # Update search depth
-goto config list                 # List all settings
+declare -A GOTO_SHORTCUTS
+GOTO_SHORTCUTS[proj1]="$HOME/projects/my-project"
+GOTO_SHORTCUTS[configs]="$HOME/.config"
 ```
+
+**Search Depth** - How deep to search in subdirectories (default: 3):
+```bash
+GOTO_SEARCH_DEPTH=3
+```
+
+**Cache TTL** - How long cache stays valid (default: 86400 = 24 hours):
+```bash
+GOTO_CACHE_TTL=86400
+```
+
+### Default Behavior
+
+If no `~/.gotorc` file exists, goto uses these sensible defaults:
+- Search paths: `$HOME/projects`, `$HOME/Documents`, `$HOME/workspace`
+- No custom shortcuts
+- Search depth: 3 levels
+- Cache TTL: 24 hours
+
+### How It Works
+
+unix-goto uses "seed directories" that you configure in `GOTO_SEARCH_PATHS`. It then:
+1. Recursively scans subdirectories up to `GOTO_SEARCH_DEPTH` levels deep
+2. Builds a cache index of all discovered folders
+3. Provides instant navigation to any folder found
+
+This design makes it flexible for any user or environment - just configure your seed directories and goto will adapt to your structure.
 
 ## Testing
 

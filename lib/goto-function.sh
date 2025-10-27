@@ -2,6 +2,30 @@
 # unix-goto - Smart project navigation with natural language support
 # https://github.com/manutej/unix-goto
 
+# Load configuration from ~/.gotorc if it exists
+__goto_load_config() {
+    # Set default values
+    GOTO_SEARCH_PATHS=()
+    # Declare associative array for shortcuts
+    declare -g -A GOTO_SHORTCUTS
+    GOTO_SHORTCUTS=()
+    
+    # Load user configuration if it exists
+    if [ -f "$HOME/.gotorc" ]; then
+        source "$HOME/.gotorc"
+    fi
+    
+    # If no search paths configured, use sensible defaults
+    if [ ${#GOTO_SEARCH_PATHS[@]} -eq 0 ]; then
+        # Default: search in common project directories
+        GOTO_SEARCH_PATHS=(
+            "$HOME/projects"
+            "$HOME/Documents"
+            "$HOME/workspace"
+        )
+    fi
+}
+
 # Helper function to navigate and track history
 __goto_navigate_to() {
     local target_dir="$1"
@@ -34,6 +58,9 @@ __goto_navigate_to() {
 
 # Quick project navigation with natural language support
 goto() {
+    # Load configuration
+    __goto_load_config
+    
     # Handle --help flag
     if [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
         echo "goto - Smart project navigation with natural language support"
@@ -51,19 +78,16 @@ goto() {
         echo "  goto benchmark [cmd]     Run performance benchmarks"
         echo "  goto --help              Show this help"
         echo ""
-        echo "Direct Shortcuts:"
-        echo "  luxor                    LUXOR root"
-        echo "  halcon                   HALCON project"
-        echo "  docs                     ASCIIDocs root"
-        echo "  infra                    ASCIIDocs/infra"
-        echo "  zshrc                    Source and display ~/.zshrc"
-        echo "  bashrc                   Source and display ~/.bashrc"
+        echo "Configuration:"
+        echo "  ~/.gotorc                User configuration file"
+        echo "  GOTO_SEARCH_PATHS        Array of directories to search"
+        echo "  GOTO_SHORTCUTS           Associative array of custom shortcuts"
         echo ""
         echo "Smart Features:"
         echo "  Cache Lookup             O(1) fast navigation (8x faster)"
-        echo "  Multi-level Paths        goto GAI-3101/docs"
+        echo "  Multi-level Paths        goto project/docs"
         echo "  Recursive Search         Finds nested folders up to 3 levels"
-        echo "  Natural Language         'the halcon project' (powered by Claude)"
+        echo "  Natural Language         'the project folder' (powered by Claude)"
         echo ""
         echo "Bookmarks:"
         echo "  @work, @proj1, etc.      Quick access to saved locations"
@@ -90,7 +114,7 @@ goto() {
         echo "  goto benchmark --help    Full benchmark options"
         echo ""
         echo "Examples:"
-        echo "  goto unix-goto           Find and navigate to unix-goto folder"
+        echo "  goto my-project          Find and navigate to my-project folder"
         echo "  goto Git_Repos/unix-goto Navigate using multi-level path"
         echo "  goto @work               Navigate to 'work' bookmark"
         echo "  goto 'the halcon folder' Natural language navigation"
@@ -178,23 +202,16 @@ goto() {
             glow "$HOME/.bashrc" 2>/dev/null || cat "$HOME/.bashrc"
             return
             ;;
-        luxor)
-            __goto_navigate_to "$HOME/Documents/LUXOR"
-            return
-            ;;
-        halcon)
-            __goto_navigate_to "$HOME/Documents/LUXOR/PROJECTS/HALCON"
-            return
-            ;;
-        docs)
-            __goto_navigate_to "$HOME/ASCIIDocs"
-            return
-            ;;
-        infra)
-            __goto_navigate_to "$HOME/ASCIIDocs/infra"
-            return
-            ;;
     esac
+    
+    # Check for custom shortcuts from configuration
+    if [ ${#GOTO_SHORTCUTS[@]} -gt 0 ]; then
+        if [[ -v GOTO_SHORTCUTS["$1"] ]]; then
+            local shortcut_path="${GOTO_SHORTCUTS[$1]}"
+            __goto_navigate_to "$shortcut_path"
+            return
+        fi
+    fi
 
     # Validate single argument for directory navigation
     # (multi-word directories should use hyphens: unix-goto, not "unix goto")
@@ -211,13 +228,8 @@ goto() {
         return 1
     fi
 
-    # Search paths for direct folder matching
-    # Customize these paths for your environment
-    local search_paths=(
-        "$HOME/ASCIIDocs"
-        "$HOME/Documents/LUXOR"
-        "$HOME/Documents/LUXOR/PROJECTS"
-    )
+    # Use configured search paths
+    local search_paths=("${GOTO_SEARCH_PATHS[@]}")
 
     # Check if input contains path separators (multi-level navigation)
     if [[ "$1" == */* ]]; then

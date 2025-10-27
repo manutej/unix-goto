@@ -19,13 +19,12 @@ __goto_cache_init() {
 # Build cache index by scanning all search paths
 __goto_cache_build() {
     __goto_cache_init
+    
+    # Load configuration to get search paths
+    __goto_load_config
 
-    # Get search paths (same as goto-function.sh)
-    local search_paths=(
-        "$HOME/ASCIIDocs"
-        "$HOME/Documents/LUXOR"
-        "$HOME/Documents/LUXOR/PROJECTS"
-    )
+    # Use configured search paths
+    local search_paths=("${GOTO_SEARCH_PATHS[@]}")
 
     # Determine search depth (configurable, default 3)
     local depth="${GOTO_SEARCH_DEPTH:-3}"

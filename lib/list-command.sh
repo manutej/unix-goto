@@ -7,17 +7,19 @@ __goto_list_all() {
     local show_shortcuts="${1:-true}"
     local show_folders="${2:-true}"
     local show_bookmarks="${3:-true}"
+    
+    # Load configuration
+    __goto_load_config
 
     echo "Available destinations:"
     echo ""
 
-    # Show shortcuts
-    if [ "$show_shortcuts" = "true" ]; then
+    # Show custom shortcuts from configuration
+    if [ "$show_shortcuts" = "true" ] && [ ${#GOTO_SHORTCUTS[@]} -gt 0 ]; then
         echo "  \033[1;33m⚡ Shortcuts:\033[0m"
-        echo "     luxor     → $HOME/Documents/LUXOR"
-        echo "     halcon    → $HOME/Documents/LUXOR/PROJECTS/HALCON"
-        echo "     docs      → $HOME/ASCIIDocs"
-        echo "     infra     → $HOME/ASCIIDocs/infra"
+        for shortcut in "${!GOTO_SHORTCUTS[@]}"; do
+            printf "     %-10s → %s\n" "$shortcut" "${GOTO_SHORTCUTS[$shortcut]}"
+        done
         echo ""
     fi
 
@@ -39,11 +41,8 @@ __goto_list_all() {
     if [ "$show_folders" = "true" ]; then
         echo "  \033[1;32m📁 Available Folders:\033[0m"
 
-        local search_paths=(
-            "$HOME/ASCIIDocs"
-            "$HOME/Documents/LUXOR"
-            "$HOME/Documents/LUXOR/PROJECTS"
-        )
+        # Use configured search paths
+        local search_paths=("${GOTO_SEARCH_PATHS[@]}")
 
         local folder_count=0
         for base_path in "${search_paths[@]}"; do

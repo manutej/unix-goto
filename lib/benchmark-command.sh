@@ -344,12 +344,12 @@ __goto_benchmark_parallel() {
     echo ""
     echo "Iterations: $iterations"
     echo ""
-
-    local search_paths=(
-        "$HOME/ASCIIDocs"
-        "$HOME/Documents/LUXOR"
-        "$HOME/Documents/LUXOR/PROJECTS"
-    )
+    
+    # Load configuration
+    __goto_load_config
+    
+    # Use configured search paths
+    local search_paths=("${GOTO_SEARCH_PATHS[@]}")
 
     echo "Search Paths:"
     for path in "${search_paths[@]}"; do
