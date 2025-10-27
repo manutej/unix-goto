@@ -52,13 +52,6 @@ Smart Unix navigation tools powered by Claude AI. Navigate your filesystem using
   - `goto list --shortcuts` → Show only shortcuts
   - `goto list --bookmarks` → Show only bookmarks
 
-- **Performance Benchmarks**: Measure and optimize navigation performance
-  - `goto benchmark navigation` → Test navigation speed (cached vs uncached)
-  - `goto benchmark cache` → Test cache performance and hit rate
-  - `goto benchmark parallel` → Test parallel search performance
-  - `goto benchmark report` → Generate performance summary
-  - `benchmark-goto all` → Run complete benchmark suite
-
 - **Special Commands**:
   - `goto ~` → Return to home directory
   - `goto zshrc` → Source and display .zshrc with syntax highlighting
@@ -189,26 +182,6 @@ goto list --folders      # Show only folders in search paths
 goto list --bookmarks    # Show only bookmarks
 ```
 
-### Performance Benchmarks
-```bash
-# Run specific benchmarks
-goto benchmark navigation              # Test navigation performance
-goto benchmark cache typical           # Test cache with typical workspace (50 folders)
-goto benchmark parallel                # Test parallel search performance
-goto benchmark report                  # Generate comprehensive report
-
-# Run complete suite
-goto benchmark all                     # Run all benchmarks (5 iterations each)
-benchmark-goto all                     # Standalone execution
-
-# Manage test workspaces
-goto benchmark workspace create large  # Create large test workspace (200+ folders)
-goto benchmark workspace stats         # Show workspace statistics
-goto benchmark workspace clean         # Remove test workspace
-
-# See BENCHMARKS.md for complete documentation
-```
-
 ## Configuration
 
 unix-goto is fully configurable to adapt to any user's directory structure. Configuration is done via the `~/.gotorc` file.
@@ -331,49 +304,17 @@ For complete testing documentation, see:
 - [TESTING-COMPREHENSIVE.md](docs/testing/TESTING-COMPREHENSIVE.md) - Enhanced testing guide with edge cases
 - [QUICK-REFERENCE-TESTING.md](docs/testing/QUICK-REFERENCE-TESTING.md) - Quick reference for common tasks
 
-## Performance & Benchmarks
+## Performance
 
-unix-goto is designed for speed with sub-100ms navigation performance targets.
-
-### Performance Results
+unix-goto is designed for speed with sub-100ms navigation performance:
 
 | Metric | Target | Actual | Status |
 |--------|--------|--------|--------|
 | Cached navigation | <100ms | 18ms | ✓ Excellent |
 | Bookmark lookup | <10ms | ~5ms | ✓ Excellent |
 | Cache hit rate | >90% | ~95% | ✓ Excellent |
-| Cache speedup | >20x | ~25x | ✓ Excellent |
 
-### Running Benchmarks
-
-```bash
-# Run all benchmarks
-./benchmarks/run-benchmarks.sh --all
-
-# Run specific benchmark
-./benchmarks/run-benchmarks.sh directory-lookup
-
-# Generate performance report
-./benchmarks/run-benchmarks.sh --report
-
-# Custom iterations for accuracy
-./benchmarks/run-benchmarks.sh -i 20 directory-lookup
-```
-
-### Benchmark Suite
-
-The benchmark suite measures:
-
-- **Navigation performance**: Cached vs uncached lookup times
-- **Cache effectiveness**: Hit rates and speedup measurements
-- **Workspace scalability**: Performance across different directory tree sizes
-- **Search depth impact**: Performance vs directory nesting levels
-- **Bookmark speed**: Bookmark retrieval performance
-
-### Documentation
-
-For complete benchmark documentation and methodology, see:
-- [BENCHMARKS-README.md](docs/testing/BENCHMARKS-README.md) - Complete benchmarking guide with detailed methodology
+Performance benchmarking tools are available in `dev-tools/benchmarks/` for developers.
 
 ## How It Works
 

@@ -75,7 +75,6 @@ goto() {
         echo "Core Commands:"
         echo "  goto list [options]      List available destinations"
         echo "  goto index <cmd>         Manage folder cache index"
-        echo "  goto benchmark [cmd]     Run performance benchmarks"
         echo "  goto --help              Show this help"
         echo ""
         echo "Configuration:"
@@ -107,11 +106,6 @@ goto() {
         echo "  goto index status        Show cache statistics"
         echo "  goto index clear         Clear cache"
         echo "  goto index --help        Full cache commands"
-        echo ""
-        echo "Performance:"
-        echo "  goto benchmark           Run performance tests"
-        echo "  goto benchmark compare   Compare cache vs search"
-        echo "  goto benchmark --help    Full benchmark options"
         echo ""
         echo "Examples:"
         echo "  goto my-project          Find and navigate to my-project folder"
@@ -169,15 +163,6 @@ goto() {
                 __goto_index_command "$@"
             else
                 echo "⚠️  Index/cache command not loaded"
-            fi
-            return
-            ;;
-        benchmark|bench)
-            if command -v __goto_benchmark &> /dev/null; then
-                shift
-                __goto_benchmark "$@"
-            else
-                echo "⚠️  Benchmark command not loaded"
             fi
             return
             ;;

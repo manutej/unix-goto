@@ -17,13 +17,14 @@ if [ ! -d "$GOTO_LIB_DIR" ]; then
     return 1 2>/dev/null || exit 1
 fi
 
-# Load all modules in correct order
+# Load core modules in correct order
 source "$GOTO_LIB_DIR/history-tracking.sh"
 source "$GOTO_LIB_DIR/back-command.sh"
 source "$GOTO_LIB_DIR/recent-command.sh"
 source "$GOTO_LIB_DIR/bookmark-command.sh"
 source "$GOTO_LIB_DIR/cache-index.sh"
 source "$GOTO_LIB_DIR/list-command.sh"
-source "$GOTO_LIB_DIR/benchmark-command.sh"
-source "$GOTO_LIB_DIR/benchmark-workspace.sh"
 source "$GOTO_LIB_DIR/goto-function.sh"
+
+# Optional: Load benchmarking tools (dev/testing only)
+# Uncomment to enable: source "$(dirname "$GOTO_LIB_DIR")/dev-tools/benchmarks/benchmark-command.sh"
