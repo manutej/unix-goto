@@ -1,0 +1,144 @@
+#!/bin/bash
+# unix-goto standalone benchmark script
+# Can be run independently without sourcing goto functions
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Source benchmark libraries
+if [ -f "$REPO_DIR/lib/benchmark-command.sh" ]; then
+    source "$REPO_DIR/lib/benchmark-command.sh"
+else
+    echo "❌ Error: benchmark-command.sh not found"
+    echo "Expected at: $REPO_DIR/lib/benchmark-command.sh"
+    exit 1
+fi
+
+if [ -f "$REPO_DIR/lib/benchmark-workspace.sh" ]; then
+    source "$REPO_DIR/lib/benchmark-workspace.sh"
+fi
+
+# Show header
+show_header() {
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════════════╗"
+    echo "║                 UNIX-GOTO BENCHMARK SUITE                        ║"
+    echo "║                    Standalone Runner                             ║"
+    echo "╚══════════════════════════════════════════════════════════════════╝"
+    echo ""
+}
+
+# Show usage
+show_usage() {
+    show_header
+
+    echo "Usage: benchmark-goto <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  navigation [target] [iterations]     Navigation performance test"
+    echo "  cache [workspace] [iterations]       Cache performance test"
+    echo "  parallel [iterations]                Parallel search test"
+    echo "  report                               Generate summary report"
+    echo "  all                                  Run all benchmarks"
+    echo "  workspace <action> [args]            Manage test workspaces"
+    echo "  --help                               Show this help"
+    echo ""
+    echo "Workspace Actions:"
+    echo "  create <type>                        Create test workspace (small|typical|large)"
+    echo "  stats                                Show workspace statistics"
+    echo "  clean                                Remove test workspace"
+    echo ""
+    echo "Examples:"
+    echo "  benchmark-goto navigation unix-goto 10"
+    echo "  benchmark-goto cache typical 10"
+    echo "  benchmark-goto parallel 10"
+    echo "  benchmark-goto all"
+    echo "  benchmark-goto report"
+    echo "  benchmark-goto workspace create typical"
+    echo ""
+    echo "Performance Targets:"
+    echo "  Navigation:    <100ms (cached)"
+    echo "  Cache hit:     >90%"
+    echo "  Speedup:       20-50x (uncached vs cached)"
+    echo ""
+}
+
+# Main execution
+main() {
+    local command="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$command" in
+        navigation|nav)
+            show_header
+            __goto_benchmark_navigation "$@"
+            ;;
+        cache)
+            show_header
+            __goto_benchmark_cache "$@"
+            ;;
+        parallel|par)
+            show_header
+            __goto_benchmark_parallel "$@"
+            ;;
+        report|summary)
+            show_header
+            __goto_benchmark_report "$@"
+            ;;
+        all)
+            show_header
+            echo "Running complete benchmark suite..."
+            echo ""
+            sleep 1
+
+            echo "═══════════════════════════════════════════════════════════════════"
+            echo " Step 1/4: Navigation Benchmark"
+            echo "═══════════════════════════════════════════════════════════════════"
+            __goto_benchmark_navigation "unix-goto" 5
+
+            echo ""
+            echo "═══════════════════════════════════════════════════════════════════"
+            echo " Step 2/4: Cache Benchmark"
+            echo "═══════════════════════════════════════════════════════════════════"
+            __goto_benchmark_cache "typical" 5
+
+            echo ""
+            echo "═══════════════════════════════════════════════════════════════════"
+            echo " Step 3/4: Parallel Search Benchmark"
+            echo "═══════════════════════════════════════════════════════════════════"
+            __goto_benchmark_parallel 5
+
+            echo ""
+            echo "═══════════════════════════════════════════════════════════════════"
+            echo " Step 4/4: Generating Report"
+            echo "═══════════════════════════════════════════════════════════════════"
+            __goto_benchmark_report
+
+            echo ""
+            echo "✓ Complete benchmark suite finished"
+            ;;
+        workspace|ws)
+            if command -v __goto_benchmark_workspace &> /dev/null; then
+                show_header
+                __goto_benchmark_workspace "$@"
+            else
+                echo "❌ Error: Workspace management not available"
+                exit 1
+            fi
+            ;;
+        --help|-h|help|"")
+            show_usage
+            ;;
+        *)
+            echo "❌ Unknown command: $command"
+            echo ""
+            show_usage
+            exit 1
+            ;;
+    esac
+}
+
+# Run main
+main "$@"

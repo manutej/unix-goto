@@ -1,0 +1,59 @@
+# unix-goto configuration file
+# Copy this file to ~/.gotorc and customize for your environment
+# https://github.com/manutej/unix-goto
+
+# ============================================================================
+# SEARCH PATHS
+# ============================================================================
+# Define directories where goto will search for folders
+# These are the "seed directories" that will be recursively searched
+# Add your commonly-used project directories here
+
+GOTO_SEARCH_PATHS=(
+    "$HOME/projects"          # Personal projects
+    "$HOME/work"              # Work projects
+    "$HOME/Documents"         # Documents folder
+    "$HOME/workspace"         # Development workspace
+    # Add more paths as needed:
+    # "$HOME/code"
+    # "$HOME/src"
+    # "/opt/projects"
+)
+
+# ============================================================================
+# CUSTOM SHORTCUTS
+# ============================================================================
+# Define custom shortcuts for frequently accessed directories
+# Usage: goto <shortcut_name>
+# Example: goto work → navigates to your work directory
+
+declare -A GOTO_SHORTCUTS
+GOTO_SHORTCUTS[work]="$HOME/work"
+GOTO_SHORTCUTS[docs]="$HOME/Documents"
+GOTO_SHORTCUTS[downloads]="$HOME/Downloads"
+# Add more shortcuts as needed:
+# GOTO_SHORTCUTS[proj1]="$HOME/projects/my-project"
+# GOTO_SHORTCUTS[configs]="$HOME/.config"
+
+# ============================================================================
+# SEARCH CONFIGURATION
+# ============================================================================
+# Maximum depth for recursive directory search (default: 3)
+# Higher values search deeper but take longer
+GOTO_SEARCH_DEPTH=3
+
+# ============================================================================
+# CACHE CONFIGURATION
+# ============================================================================
+# Cache time-to-live in seconds (default: 86400 = 24 hours)
+# Cache will be automatically refreshed after this period
+GOTO_CACHE_TTL=86400
+
+# ============================================================================
+# NOTES
+# ============================================================================
+# - Paths should use $HOME instead of hardcoded paths like /Users/username
+# - Use absolute paths, not relative paths
+# - Shortcuts are case-sensitive
+# - Changes take effect after sourcing: source ~/.zshrc (or ~/.bashrc)
+# - Run 'goto index rebuild' after changing search paths to update cache

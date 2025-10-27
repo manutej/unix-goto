@@ -69,7 +69,121 @@ goto list --folders      # Only folders
 - Categorized by type (shortcuts, bookmarks, folders)
 - Colored output for better readability
 
-## Phase 3: Smart Search & Discovery
+## Phase 3: High-Performance Navigation (v0.4.0 - Planned)
+
+**Focus:** Speed, usability, and scripting support - NO AI features
+
+### 1. Folder Index Caching System ⏳
+```bash
+goto index rebuild       # Build/rebuild folder index cache
+goto index status        # Show cache stats
+goto index clear         # Clear cache
+```
+
+**Implementation:**
+- Cache all navigable folders in `~/.goto_index`
+- Reduce navigation from ~2-5s to <100ms for cached lookups
+- Auto-refresh cache when older than 24 hours
+- O(1) lookup instead of O(n) file system scans
+
+### 2. Quick Bookmark Current Directory ⏳
+```bash
+bookmark .               # Bookmark current dir with folder name
+bookmark here proj1      # Bookmark current dir as "proj1"
+bookmark add proj1 .     # Alternative syntax
+```
+
+**Implementation:**
+- Detect `.` argument and replace with `$PWD`
+- Extract folder name for auto-naming
+- No need to type full path
+
+### 3. Configurable Search Depth ⏳
+```bash
+goto --depth 5 unix-goto         # One-time deeper search
+goto config set depth 4          # Update default depth
+goto config                      # Show current config
+```
+
+**Implementation:**
+- Create `~/.gotorc` configuration file
+- Default depth: 3 (backward compatible)
+- Per-search override with `--depth` flag
+- Configurable settings: depth, cache TTL, parallel search
+
+### 4. Tab Completion for Bash/Zsh ⏳
+**Implementation:**
+- Bash completion script: `completions/goto-completion.bash`
+- Zsh completion script: `completions/goto-completion.zsh`
+- Complete subcommands, bookmarks (@name), shortcuts, folders
+- Auto-installed via `install.sh`
+
+### 5. Batch-Friendly Output Modes ⏳
+```bash
+goto list --format json          # {"shortcuts": [...], "bookmarks": [...]}
+goto list --format simple        # One path per line (for scripting)
+goto --quiet luxor               # Suppress human-readable output
+goto pwd @proj1                  # Print path without navigating
+goto check unix-goto --quiet     # Test if exists (exit code only)
+```
+
+**Implementation:**
+- `--format json|simple|csv` flags
+- `--quiet` mode for scripts
+- `goto pwd <target>` - print path without navigation
+- `goto check <target>` - existence test (exit code)
+
+### 6. Execute Commands in Target Directory ⏳
+```bash
+goto exec luxor "git status"     # Run in luxor, return here
+goto exec @proj1 "npm test"      # Run in bookmark
+goto exec --stay luxor "git pull" # Navigate and stay
+```
+
+**Implementation:**
+- Execute command in target directory
+- Return to original directory by default
+- `--stay` flag to remain in target
+- Preserve command exit codes
+
+## Phase 4: Advanced Performance & UX (v0.5.0 - Planned)
+
+**Focus:** Optimization and advanced matching
+
+### 1. Parallel Search Across Multiple Paths ⏳
+**Implementation:**
+- Launch searches in background jobs across all search paths
+- Collect results as they complete
+- Early termination on first unique match
+- ~50% faster for multi-path searches
+
+### 2. Fuzzy Matching for Folder Names ⏳
+```bash
+goto halcn           # Fuzzy match → HALCON
+goto gai3            # Fuzzy match → GAI-3101
+goto unx-gt          # Fuzzy match → unix-goto
+```
+
+**Implementation:**
+- Levenshtein distance algorithm
+- Interactive selection for multiple fuzzy matches
+- Configurable fuzzy threshold
+- Can disable: `GOTO_FUZZY=false` in ~/.gotorc
+
+### 3. Performance Benchmark Suite ⏳
+```bash
+./bin/benchmark-goto             # Run comprehensive benchmarks
+```
+
+**Implementation:**
+- Automated benchmark script
+- Measure cache vs no-cache, parallel vs sequential, depth impact
+- Generate comparison reports
+- CI integration for regression detection
+
+## Phase 5: Smart Search & Discovery (v0.6.0 - Future)
+
+**Focus:** AI-powered search and workspace management
 
 ### `finddir` - Natural language directory search
 ```bash
@@ -83,32 +197,19 @@ finddir "large directories over 1GB"
 - Combine with find/fd commands
 - Return ranked results based on relevance
 
-### `goto list` - Show available destinations
+### Enhanced `goto list` Features
 ```bash
-goto list                 # All folders in search paths
-goto list --shortcuts     # Only shortcuts
-goto list --bookmarks     # Only bookmarks
-goto list --recent        # Recent folders
+goto list --recent               # Recent folders from history
+goto list --sort name            # Alphabetical sorting
+goto list --search python        # Filter by keyword
 ```
 
 **Implementation:**
-- Scan configured search paths
-- Display formatted output with categories
-- Support filtering and sorting
+- Recent filter integration
+- Multiple sorting options (name, recent, size, modified)
+- Keyword search/filter
 
-## Phase 4: Productivity Enhancements
-
-### `goto exec` - Execute commands in target directory
-```bash
-goto exec infra "git status"
-goto exec luxor "ls -la"
-goto exec "the halcon project" "npm run dev"
-```
-
-**Implementation:**
-- Navigate to folder
-- Execute command
-- Return to original directory (optional flag)
+## Phase 6: Productivity Enhancements (v0.7.0 - Future)
 
 ### `workspace` - Manage multi-folder workspaces
 ```bash
@@ -123,17 +224,7 @@ workspace goto mywork         # Interactive selection
 - Integration with tmux for split panes
 - Support for VS Code workspace files
 
-### `goto watch` - Monitor folder and navigate on changes
-```bash
-goto watch GAI-3101      # Navigate when files change
-goto watch infra --exec "git status"
-```
-
-**Implementation:**
-- Use fswatch or inotify
-- Trigger navigation or commands on file changes
-
-## Phase 5: AI-Powered Features
+## Phase 7: AI-Powered Features (Future)
 
 ### Enhanced natural language understanding
 - Context awareness (time-based, project-based)
@@ -157,7 +248,7 @@ smart "suggest a good place to start this new feature"
 - Group similar projects
 - Smart tags and organization
 
-## Phase 6: Integration & Ecosystem
+## Phase 8: Integration & Ecosystem (Future)
 
 ### Git integration
 ```bash
@@ -178,26 +269,27 @@ goto pr 123                      # Navigate to PR folder
 
 ## Technical Improvements
 
-### Performance
-- [ ] Cache folder listings
-- [ ] Async Claude AI calls
-- [ ] Parallel search across paths
-- [ ] Intelligent caching of NLP results
+### Performance (Phase 3 & 4)
+- [ ] Cache folder listings → Phase 3 Feature #1
+- [ ] Parallel search across paths → Phase 4 Feature #1
+- [ ] Async Claude AI calls → Phase 7 (AI features)
+- [ ] Intelligent caching of NLP results → Phase 7 (AI features)
 
-### UX Enhancements
-- [ ] Fuzzy matching for folder names
-- [ ] Tab completion for all commands
-- [ ] Rich output formatting (colors, icons)
-- [ ] Progress indicators for slow operations
+### UX Enhancements (Phase 3 & 4)
+- [ ] Tab completion for all commands → Phase 3 Feature #4
+- [ ] Fuzzy matching for folder names → Phase 4 Feature #2
+- [ ] Rich output formatting (colors, icons) → Ongoing
+- [ ] Progress indicators for slow operations → Ongoing
 
 ### Testing & Quality
 - [ ] Unit tests for all functions
 - [ ] Integration tests with mocked Claude
 - [ ] Shell script linting (shellcheck)
 - [ ] Automated release pipeline
+- [ ] Performance benchmarks → Phase 4 Feature #3
 
-### Configuration
-- [ ] Config file support (~/.gotorc)
+### Configuration (Phase 3)
+- [ ] Config file support (~/.gotorc) → Phase 3 Feature #3
 - [ ] Per-project configuration
 - [ ] Environment-specific settings
 - [ ] Profiles (work, personal, etc.)
@@ -241,11 +333,11 @@ workspace switch client-work     # Switches entire terminal context
 Want to help build this? Check out the [Contributing Guide](CONTRIBUTING.md) and pick an item from the roadmap!
 
 Priority areas for contribution:
-1. Phase 2 features (history & bookmarks)
-2. Testing framework
-3. Performance optimizations
+1. **Phase 3 features** (folder caching, quick bookmarking, tab completion)
+2. **Phase 4 features** (parallel search, fuzzy matching, benchmarks)
+3. Testing framework
 4. Documentation improvements
 
 ---
 
-Last updated: 2025-10-06
+Last updated: 2025-10-17
