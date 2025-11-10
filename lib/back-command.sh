@@ -42,7 +42,7 @@ __goto_stack_pop() {
     /bin/rm -f "$GOTO_STACK_FILE.bak"
 
     if [ -d "$prev_dir" ]; then
-        cd "$prev_dir"
+        cd "$prev_dir" || return 1
         echo "← $PWD"
     else
         echo "⚠️  Directory no longer exists: $prev_dir"
