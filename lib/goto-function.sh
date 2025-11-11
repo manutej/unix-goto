@@ -178,7 +178,16 @@ goto() {
         fi
     done
 
-    # If not found at root level, search recursively for unique folder names
+    # If not found at root level, try fuzzy matching first
+    if command -v __goto_fuzzy_search &> /dev/null; then
+        echo "🔍 No exact match, trying fuzzy search..."
+        __goto_fuzzy_search "$1"
+        local fuzzy_result=$?
+        [ $fuzzy_result -eq 0 ] && return 0
+        # If fuzzy returned error code 1 (no match or ambiguous), continue to recursive search
+    fi
+
+    # If fuzzy didn't work, search recursively for unique folder names
     # This allows: goto unix-goto (finds LUXOR/Git_Repos/unix-goto)
     echo "🔍 Searching in subdirectories..."
 

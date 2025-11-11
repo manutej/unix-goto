@@ -60,6 +60,10 @@ EOF
     cat "$REPO_DIR/lib/list-command.sh" >> "$SHELL_CONFIG"
     echo "" >> "$SHELL_CONFIG"
 
+    echo "# Fuzzy matching" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/fuzzy-matching.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
     echo "# Main goto function" >> "$SHELL_CONFIG"
     cat "$REPO_DIR/lib/goto-function.sh" >> "$SHELL_CONFIG"
 fi
