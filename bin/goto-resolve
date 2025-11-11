@@ -51,8 +51,22 @@ Example queries and responses:
 - 'luxor root' -> luxor
 - 'work assignment 3590' -> WA3590"
 
+# Find Claude CLI (try PATH first, then common locations)
+CLAUDE_CMD=""
+if command -v claude &> /dev/null; then
+    CLAUDE_CMD="claude"
+elif [ -f "$HOME/.claude/local/claude" ]; then
+    CLAUDE_CMD="$HOME/.claude/local/claude"
+elif [ -f "/Users/manu/.claude/local/claude" ]; then
+    # Fallback for original development environment
+    CLAUDE_CMD="/Users/manu/.claude/local/claude"
+else
+    echo "Error: Claude CLI not found. Please install Claude CLI first." >&2
+    exit 1
+fi
+
 # Call Claude with the query
-RESPONSE=$(/Users/manu/.claude/local/claude --print --model claude-3-5-sonnet-20241022 --append-system-prompt "$SYSTEM_PROMPT" "$QUERY" 2>/dev/null)
+RESPONSE=$($CLAUDE_CMD --print --model claude-3-5-sonnet-20241022 --append-system-prompt "$SYSTEM_PROMPT" "$QUERY" 2>/dev/null)
 
 # Extract just the folder name (first line, trimmed)
 FOLDER=$(echo "$RESPONSE" | head -1 | tr -d '[:space:]' | tr -d '"' | tr -d "'")

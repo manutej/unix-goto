@@ -12,7 +12,7 @@ __goto_navigate_to() {
     fi
 
     # Navigate
-    cd "$target_dir"
+    cd "$target_dir" || return 1
 
     # Track in history
     if command -v __goto_track &> /dev/null; then
@@ -95,7 +95,7 @@ goto() {
             return
             ;;
         "~")
-            cd "$HOME"
+            cd "$HOME" || return 1
             echo "→ $HOME"
             return
             ;;

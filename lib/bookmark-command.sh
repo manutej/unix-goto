@@ -131,7 +131,7 @@ __goto_bookmark_goto() {
     if command -v __goto_navigate_to &> /dev/null; then
         __goto_navigate_to "$path"
     else
-        cd "$path"
+        cd "$path" || return 1
         echo "→ $PWD"
     fi
 }

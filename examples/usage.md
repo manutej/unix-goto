@@ -19,6 +19,31 @@ goto WA3590         # Goes to ASCIIDocs/WA3590
 goto HALCON         # Goes to LUXOR/PROJECTS/HALCON
 ```
 
+### Multi-Level Navigation (v0.3.0+)
+```bash
+# Navigate to nested folders using path separators
+goto GAI-3101/docs              # Navigate to docs subfolder
+goto LUXOR/Git_Repos/unix-goto  # Full path navigation
+goto HALCON/config/settings     # Multiple levels deep
+
+# Works with any depth
+goto project/sub/deep/nested
+```
+
+### Smart Search (v0.3.0+)
+```bash
+# Automatically finds uniquely named folders
+goto unix-goto      # Finds LUXOR/Git_Repos/unix-goto automatically
+goto config         # Searches up to 3 levels deep
+
+# Shows disambiguation menu if multiple matches found
+goto docs
+# ⚠️  Multiple folders named 'docs' found:
+#   1) /Users/.../ASCIIDocs/docs
+#   2) /Users/.../LUXOR/project1/docs
+# Please be more specific or use the full path
+```
+
 ## Natural Language Navigation
 
 Powered by Claude AI, you can use plain English to navigate:
@@ -57,6 +82,64 @@ goto bashrc         # Source ~/.bashrc and display with glow/cat
 goto --help         # Show help and usage information
 goto -h             # Short form
 goto                # No args also shows help
+```
+
+## Navigation History (v0.2.0+)
+
+### Back Command
+```bash
+# Navigate backward through directory history
+back                # Go to previous directory
+back 3              # Go back 3 directories
+back --list         # Show navigation history
+back --clear        # Clear navigation history
+```
+
+### Recent Folders
+```bash
+# View and navigate to recently visited locations
+recent              # List 10 most recent folders
+recent 20           # List 20 most recent folders
+recent --goto 3     # Navigate to 3rd recent folder
+recent --clear      # Clear recent history
+```
+
+## Bookmarks (v0.2.0+)
+
+### Bookmark Management
+```bash
+# Save and manage favorite locations
+bookmark add proj1                    # Bookmark current directory
+bookmark add api ~/code/api           # Bookmark specific path
+bookmark list                         # Show all bookmarks
+bookmark goto proj1                   # Navigate to bookmark
+goto @proj1                           # Navigate using @ prefix (shortcut)
+bookmark rm proj1                     # Remove bookmark
+bm list                               # Short alias for bookmark
+```
+
+### Bookmark Examples
+```bash
+# Save frequently used locations
+cd ~/Documents/important/project
+bookmark add work
+
+# Later, quickly return
+goto @work          # Jump directly to bookmarked location
+
+# Combine with multi-level navigation
+goto @work/tests    # Navigate to subfolder of bookmark
+```
+
+## Discovery (v0.2.0+)
+
+### List Available Destinations
+```bash
+# Discover all available navigation options
+goto list                # Show all destinations
+goto list --shortcuts    # Show only predefined shortcuts
+goto list --folders      # Show only folders in search paths
+goto list --bookmarks    # Show only bookmarks
 ```
 
 ## Advanced Usage
@@ -105,14 +188,16 @@ local search_paths=(
 
 ### Morning Workflow
 ```bash
-# Check personal projects
-goto docs
+# Set up bookmarks for your daily routine
+bookmark add dailywork ~/Documents/work/current-project
+bookmark add personal ~/Documents/personal
 
-# Jump to work project
-goto "that GAI project"
+# Quick morning navigation
+goto @dailywork     # Jump to work project
+goto @personal/docs # Check personal docs
 
-# Check infrastructure
-goto infra
+# Use recent to revisit yesterday's work
+recent --goto 1     # Go to most recent location
 ```
 
 ### Quick Context Switching
@@ -124,7 +209,23 @@ goto halcon          # Switch to HALCON
 goto WA3590          # Switch to work assignment
 # ... do some work ...
 
+# Navigate back through history
+back                 # Return to HALCON
+back                 # Return to wherever you were before
+
 goto ~               # Go home
+```
+
+### Using Multi-Level Paths
+```bash
+# Navigate deep into project structure
+goto HALCON/src/components/ui     # Multi-level navigation
+
+# Search and navigate
+goto unix-goto/lib                # Find base, navigate to subfolder
+
+# Quick access to nested config files
+goto @work/config/production      # Bookmark + multi-level
 ```
 
 ### Configuration Management
