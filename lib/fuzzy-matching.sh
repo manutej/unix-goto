@@ -5,6 +5,10 @@
 # Simple fuzzy matching using case-insensitive substring search
 # Design: Keep it simple - no complex algorithms needed for v0.4.0
 
+# Cache configuration
+FUZZY_CACHE_FILE="${HOME}/.goto_fuzzy_cache"
+FUZZY_CACHE_TTL=300  # 5 minutes in seconds
+
 # Fuzzy match directories
 __goto_fuzzy_match() {
     local query="$1"
@@ -29,10 +33,8 @@ __goto_fuzzy_match() {
     printf '%s\n' "${matches[@]}"
 }
 
-# Fuzzy search for directories in search paths
-__goto_fuzzy_search() {
-    local query="$1"
-
+# Build directory cache
+__goto_fuzzy_build_cache() {
     # Define search paths (same as main goto function)
     local search_paths=(
         "$HOME/ASCIIDocs"
@@ -63,6 +65,55 @@ __goto_fuzzy_search() {
         fi
     done
 
+    # Write to cache with timestamp
+    {
+        printf '%s\n' "$(date +%s)"
+        printf '%s\n' "${unique_dirs[@]}"
+    } > "$FUZZY_CACHE_FILE"
+}
+
+# Get directories from cache or rebuild if stale
+__goto_fuzzy_get_dirs() {
+    local -a cached_dirs=()
+
+    # Check if cache exists and is fresh
+    if [ -f "$FUZZY_CACHE_FILE" ]; then
+        local cache_time=$(head -n 1 "$FUZZY_CACHE_FILE" 2>/dev/null)
+        local current_time=$(date +%s)
+
+        # Check if cache is still valid
+        if [ -n "$cache_time" ] && [ $((current_time - cache_time)) -lt "$FUZZY_CACHE_TTL" ]; then
+            # Cache is fresh, read it
+            while IFS= read -r dir; do
+                [ -n "$dir" ] && cached_dirs+=("$dir")
+            done < <(tail -n +2 "$FUZZY_CACHE_FILE")
+
+            printf '%s\n' "${cached_dirs[@]}"
+            return 0
+        fi
+    fi
+
+    # Cache is stale or missing, rebuild it
+    __goto_fuzzy_build_cache
+
+    # Read the fresh cache
+    while IFS= read -r dir; do
+        [ -n "$dir" ] && cached_dirs+=("$dir")
+    done < <(tail -n +2 "$FUZZY_CACHE_FILE")
+
+    printf '%s\n' "${cached_dirs[@]}"
+}
+
+# Fuzzy search for directories in search paths
+__goto_fuzzy_search() {
+    local query="$1"
+
+    # Get directories from cache (fast!)
+    local -a unique_dirs=()
+    while IFS= read -r dir; do
+        [ -n "$dir" ] && unique_dirs+=("$dir")
+    done < <(__goto_fuzzy_get_dirs)
+
     # Get fuzzy matches
     local -a matches=()
     while IFS= read -r match; do
@@ -73,86 +124,25 @@ __goto_fuzzy_search() {
     local match_count=${#matches[@]}
 
     if [ "$match_count" -eq 0 ]; then
-        echo "❌ No matches found for: $query"
-        echo ""
-        echo "💡 Try:"
-        echo "  • Check spelling"
-        echo "  • Use fewer characters"
-        echo "  • Try 'goto list' to see available directories"
+        echo "❌ No matches for '$query'. Try 'goto list' to see available directories."
         return 1
     elif [ "$match_count" -eq 1 ]; then
         # Single match - navigate to it
         local dir="${matches[0]}"
         echo "✓ Fuzzy match: $dir"
 
-        # Find the full path
-        for base_path in "${search_paths[@]}"; do
-            if [ -d "$base_path/$dir" ]; then
-                goto "$dir"
-                return $?
-            fi
-        done
-
-        echo "❌ Error: Found match but directory not accessible"
-        return 1
+        # Let goto handle the navigation
+        goto "$dir"
+        return $?
     else
-        # Multiple matches - show options
-        echo "🔍 Multiple matches found for '$query':"
-        echo ""
-        local i=1
-        for match in "${matches[@]}"; do
-            # Show first 10 matches
-            [ $i -gt 10 ] && break
-            echo "  $i) $match"
-            ((i++))
+        # Multiple matches - show top 5
+        echo "🔍 ${#matches[@]} matches for '$query':"
+        for i in "${!matches[@]}"; do
+            [ $i -ge 5 ] && break
+            echo "  ${matches[$i]}"
         done
-
-        if [ ${#matches[@]} -gt 10 ]; then
-            echo "  ... and $((${#matches[@]} - 10)) more"
-        fi
-
-        echo ""
-        echo "💡 Be more specific or use the full name:"
-        echo "  goto ${matches[0]}"
+        [ ${#matches[@]} -gt 5 ] && echo "  ... and $((${#matches[@]} - 5)) more"
+        echo "Be more specific or use full name: goto ${matches[0]}"
         return 1
     fi
 }
-
-# Test function (for development)
-__goto_fuzzy_test() {
-    echo "Testing fuzzy matching..."
-    echo ""
-
-    # Test data
-    local test_dirs=("GAI-3101" "GAI-3102" "HALCON" "WA3590" "project-one" "project-two")
-
-    # Test 1: Exact substring
-    echo "Test 1: Query 'GAI'"
-    __goto_fuzzy_match "GAI" "${test_dirs[@]}"
-    echo ""
-
-    # Test 2: Case insensitive
-    echo "Test 2: Query 'gai' (case insensitive)"
-    __goto_fuzzy_match "gai" "${test_dirs[@]}"
-    echo ""
-
-    # Test 3: Partial match
-    echo "Test 3: Query '3101'"
-    __goto_fuzzy_match "3101" "${test_dirs[@]}"
-    echo ""
-
-    # Test 4: No match
-    echo "Test 4: Query 'xyz' (no match)"
-    __goto_fuzzy_match "xyz" "${test_dirs[@]}"
-    echo ""
-
-    # Test 5: Multiple partial matches
-    echo "Test 5: Query 'proj'"
-    __goto_fuzzy_match "proj" "${test_dirs[@]}"
-    echo ""
-
-    echo "Tests complete!"
-}
-
-# Uncomment to run tests:
-# __goto_fuzzy_test
