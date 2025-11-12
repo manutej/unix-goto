@@ -162,9 +162,46 @@ goto() {
             fi
         done
 
-        # Base segment not found
+        # Base segment not found - try fuzzy matching
+        if command -v __goto_fuzzy_get_dirs &> /dev/null; then
+            # Get all directories
+            local -a all_dirs=()
+            while IFS= read -r dir; do
+                [ -n "$dir" ] && all_dirs+=("$dir")
+            done < <(__goto_fuzzy_get_dirs)
+
+            # Fuzzy match the base segment
+            local -a matches=()
+            while IFS= read -r match; do
+                [ -n "$match" ] && matches+=("$match")
+            done < <(__goto_fuzzy_match "$base_segment" "${all_dirs[@]}")
+
+            if [ ${#matches[@]} -eq 1 ]; then
+                # Single fuzzy match found
+                local matched_base="${matches[0]}"
+                echo "✓ Fuzzy match: $base_segment → $matched_base"
+
+                # Try to navigate to the full path
+                for base_path in "${search_paths[@]}"; do
+                    local full_path="$base_path/$matched_base/$rest_path"
+                    if [ -d "$full_path" ]; then
+                        __goto_navigate_to "$full_path"
+                        return 0
+                    fi
+                done
+
+                echo "❌ '$matched_base' found, but '$rest_path' doesn't exist within it"
+                return 1
+            elif [ ${#matches[@]} -gt 1 ]; then
+                echo "❌ Multiple matches for base '$base_segment': ${matches[*]:0:5}"
+                echo "Be more specific"
+                return 1
+            fi
+        fi
+
+        # No exact or fuzzy match found
         echo "❌ Base folder not found: $base_segment"
-        echo "Try 'goto list --folders' to see available folders"
+        echo "Try 'goto list' to see available directories"
         return 1
     fi
 

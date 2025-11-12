@@ -115,6 +115,38 @@ __goto_bookmark_goto() {
 
     local path=$(__goto_bookmark_get "$name")
 
+    # If exact match not found, try fuzzy matching
+    if [ -z "$path" ] && command -v __goto_fuzzy_match &> /dev/null; then
+        __goto_bookmarks_init
+
+        # Get all bookmark names
+        local -a all_bookmarks=()
+        while IFS='|' read -r bookmark_name bookmark_path _; do
+            [ -n "$bookmark_name" ] && all_bookmarks+=("$bookmark_name")
+        done < "$GOTO_BOOKMARKS_FILE"
+
+        # Fuzzy match the bookmark name
+        local -a matches=()
+        while IFS= read -r match; do
+            [ -n "$match" ] && matches+=("$match")
+        done < <(__goto_fuzzy_match "$name" "${all_bookmarks[@]}")
+
+        if [ ${#matches[@]} -eq 1 ]; then
+            # Single fuzzy match found
+            local matched_name="${matches[0]}"
+            echo "✓ Fuzzy match: @$name → @$matched_name"
+            path=$(__goto_bookmark_get "$matched_name")
+        elif [ ${#matches[@]} -gt 1 ]; then
+            echo "❌ Multiple bookmark matches for '@$name':"
+            for match in "${matches[@]:0:5}"; do
+                echo "  @$match"
+            done
+            [ ${#matches[@]} -gt 5 ] && echo "  ... and $((${#matches[@]} - 5)) more"
+            echo "Be more specific"
+            return 1
+        fi
+    fi
+
     if [ -z "$path" ]; then
         echo "❌ Bookmark not found: $name"
         echo "List bookmarks with: bookmark list"
