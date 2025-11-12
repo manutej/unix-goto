@@ -168,6 +168,133 @@ __goto_bookmark_goto() {
     fi
 }
 
+# Sync bookmarks from configuration file
+__goto_bookmark_sync() {
+    local config_file="${HOME}/.goto_config"
+    local repo_config=".goto_config.example"
+
+    # Check if user config exists
+    if [ ! -f "$config_file" ]; then
+        if [ -f "$repo_config" ]; then
+            echo "📋 No configuration found at: $config_file"
+            echo "   Copy the example config to get started:"
+            echo "   cp .goto_config.example ~/.goto_config"
+            echo "   vim ~/.goto_config  # Add your workspace paths"
+            return 1
+        else
+            echo "❌ No configuration file found"
+            return 1
+        fi
+    fi
+
+    __goto_bookmarks_init
+
+    echo "🔄 Syncing bookmarks from config..."
+    echo ""
+
+    # Read workspace paths from config
+    local -a workspace_paths=()
+    while IFS= read -r line; do
+        # Skip empty lines and comments
+        [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+
+        # Expand tilde and environment variables
+        line=$(eval echo "$line")
+
+        # Validate path exists
+        if [ -d "$line" ]; then
+            workspace_paths+=("$line")
+        else
+            echo "⚠️  Skipping non-existent path: $line"
+        fi
+    done < "$config_file"
+
+    if [ ${#workspace_paths[@]} -eq 0 ]; then
+        echo "❌ No valid workspace paths found in config"
+        echo "   Edit ~/.goto_config and add your workspace directories"
+        return 1
+    fi
+
+    echo "Found ${#workspace_paths[@]} workspace path(s):"
+    for path in "${workspace_paths[@]}"; do
+        echo "  • $path"
+    done
+    echo ""
+
+    # Track sync-generated bookmarks
+    local -a new_bookmarks=()
+    local added_count=0
+    local updated_count=0
+    local skipped_count=0
+
+    # Scan each workspace path
+    for workspace_path in "${workspace_paths[@]}"; do
+        echo "Scanning: $workspace_path"
+
+        # Add bookmark for the workspace itself
+        local workspace_name=$(basename "$workspace_path" | tr '[:upper:]' '[:lower:]')
+        local workspace_full_path=$(cd "$workspace_path" && pwd)
+
+        # Check if bookmark exists
+        if /usr/bin/grep -q "^${workspace_name}|" "$GOTO_BOOKMARKS_FILE"; then
+            # Update if path changed
+            local existing_path=$(__goto_bookmark_get "$workspace_name")
+            if [ "$existing_path" != "$workspace_full_path" ]; then
+                /usr/bin/grep -v "^${workspace_name}|" "$GOTO_BOOKMARKS_FILE" > "$GOTO_BOOKMARKS_FILE.tmp"
+                /bin/mv "$GOTO_BOOKMARKS_FILE.tmp" "$GOTO_BOOKMARKS_FILE"
+                echo "${workspace_name}|${workspace_full_path}|$(/bin/date +%s)|sync" >> "$GOTO_BOOKMARKS_FILE"
+                echo "  ↻ Updated: $workspace_name → $workspace_full_path"
+                ((updated_count++))
+            else
+                ((skipped_count++))
+            fi
+        else
+            echo "${workspace_name}|${workspace_full_path}|$(/bin/date +%s)|sync" >> "$GOTO_BOOKMARKS_FILE"
+            echo "  ✓ Added: $workspace_name → $workspace_full_path"
+            ((added_count++))
+        fi
+        new_bookmarks+=("$workspace_name")
+
+        # Scan subdirectories (one level deep)
+        while IFS= read -r subdir; do
+            local subdir_name=$(basename "$subdir" | tr '[:upper:]' '[:lower:]')
+            local subdir_full_path=$(cd "$subdir" && pwd)
+
+            # Skip hidden directories
+            [[ "$subdir_name" == .* ]] && continue
+
+            # Check if bookmark exists
+            if /usr/bin/grep -q "^${subdir_name}|" "$GOTO_BOOKMARKS_FILE"; then
+                # Update if path changed
+                local existing_path=$(__goto_bookmark_get "$subdir_name")
+                if [ "$existing_path" != "$subdir_full_path" ]; then
+                    /usr/bin/grep -v "^${subdir_name}|" "$GOTO_BOOKMARKS_FILE" > "$GOTO_BOOKMARKS_FILE.tmp"
+                    /bin/mv "$GOTO_BOOKMARKS_FILE.tmp" "$GOTO_BOOKMARKS_FILE"
+                    echo "${subdir_name}|${subdir_full_path}|$(/bin/date +%s)|sync" >> "$GOTO_BOOKMARKS_FILE"
+                    echo "  ↻ Updated: $subdir_name → $subdir_full_path"
+                    ((updated_count++))
+                else
+                    ((skipped_count++))
+                fi
+            else
+                echo "${subdir_name}|${subdir_full_path}|$(/bin/date +%s)|sync" >> "$GOTO_BOOKMARKS_FILE"
+                echo "  ✓ Added: $subdir_name → $subdir_full_path"
+                ((added_count++))
+            fi
+            new_bookmarks+=("$subdir_name")
+        done < <(find "$workspace_path" -maxdepth 1 -type d -not -path "$workspace_path" 2>/dev/null)
+    done
+
+    echo ""
+    echo "=== Sync Summary ==="
+    echo "Added:   $added_count bookmarks"
+    echo "Updated: $updated_count bookmarks"
+    echo "Skipped: $skipped_count bookmarks (unchanged)"
+    echo ""
+    echo "✓ Sync complete! Use 'bookmark list' to see all bookmarks"
+    echo "  Or try: goto @${new_bookmarks[0]}"
+}
+
 # bookmark - Manage bookmarks for favorite locations
 bookmark() {
     local command="$1"
@@ -186,6 +313,9 @@ bookmark() {
         goto|go|g)
             __goto_bookmark_goto "$@"
             ;;
+        sync|s)
+            __goto_bookmark_sync
+            ;;
         --help|-h|help|"")
             echo "bookmark - Manage bookmarks for favorite locations"
             echo ""
@@ -194,6 +324,7 @@ bookmark() {
             echo "  bookmark rm <name>            Remove bookmark"
             echo "  bookmark list                 List all bookmarks"
             echo "  bookmark goto <name>          Navigate to bookmark"
+            echo "  bookmark sync                 Auto-generate bookmarks from ~/.goto_config"
             echo "  bookmark --help               Show this help"
             echo ""
             echo "Shortcuts:"
@@ -206,6 +337,11 @@ bookmark() {
             echo "  bookmark goto work            # Navigate to 'work' bookmark"
             echo "  goto @work                    # Navigate using @ syntax"
             echo "  bookmark rm work              # Remove bookmark"
+            echo ""
+            echo "Configuration-based bookmarks:"
+            echo "  cp .goto_config.example ~/.goto_config  # Create config"
+            echo "  vim ~/.goto_config                      # Add workspace paths"
+            echo "  bookmark sync                           # Auto-generate bookmarks"
             echo ""
             ;;
         *)

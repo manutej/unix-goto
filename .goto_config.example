@@ -1,0 +1,36 @@
+# unix-goto Configuration
+# Copy this file to ~/.goto_config and customize for your environment
+#
+# This file defines your core workspace directories.
+# The 'bookmark sync' command will automatically create bookmarks
+# for all subdirectories under these paths.
+
+# HOW IT WORKS:
+# 1. Add your main workspace paths below (one per line)
+# 2. Run: bookmark sync
+# 3. Automatic bookmarks created for all subdirectories
+# 4. All bookmark names are lowercase for consistency
+# 5. Changes sync automatically when you run 'bookmark sync' again
+
+# EXAMPLE WORKFLOW:
+# If you add: ~/Documents/LUXOR/PROJECTS
+# And it contains: GAI-3101, HALCON, WA3590
+# You get bookmarks: @projects, @gai-3101, @halcon, @wa3590
+# Then use: goto @gai-3101
+
+# Core workspace directories (one per line)
+# Format: /absolute/path/to/workspace
+# Lines starting with # are comments
+# Tilde (~) and environment variables are supported
+
+# Example configurations (uncomment and customize):
+# ~/Documents/LUXOR
+# ~/Documents/LUXOR/PROJECTS
+# ~/ASCIIDocs
+# ~/work/projects
+# ~/code
+# ~/Development
+# $HOME/workspace
+
+# Your workspace directories:
+# Add your paths below
