@@ -13,10 +13,10 @@
 # 5. Changes sync automatically when you run 'bookmark sync' again
 
 # EXAMPLE WORKFLOW:
-# If you add: ~/Documents/LUXOR/PROJECTS
-# And it contains: GAI-3101, HALCON, WA3590
-# You get bookmarks: @projects, @gai-3101, @halcon, @wa3590
-# Then use: goto @gai-3101
+# If you add: ~/work/projects
+# And it contains: client-a, client-b, internal-tool
+# You get bookmarks: @projects, @client-a, @client-b, @internal-tool
+# Then use: goto @client-a
 
 # Core workspace directories (one per line)
 # Format: /absolute/path/to/workspace
@@ -24,13 +24,12 @@
 # Tilde (~) and environment variables are supported
 
 # Example configurations (uncomment and customize):
-# ~/Documents/LUXOR
-# ~/Documents/LUXOR/PROJECTS
-# ~/ASCIIDocs
 # ~/work/projects
-# ~/code
+# ~/code/personal
 # ~/Development
-# $HOME/workspace
+# ~/workspace/active
+# $HOME/code
 
 # Your workspace directories:
 # Add your paths below
+

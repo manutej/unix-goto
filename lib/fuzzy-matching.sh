@@ -36,10 +36,11 @@ __goto_fuzzy_match() {
 # Build directory cache
 __goto_fuzzy_build_cache() {
     # Define search paths (same as main goto function)
+    # IMPORTANT: Keep these in sync with lib/goto-function.sh
     local search_paths=(
-        "$HOME/ASCIIDocs"
-        "$HOME/Documents/LUXOR"
-        "$HOME/Documents/LUXOR/PROJECTS"
+        "$HOME/work/projects"
+        "$HOME/code"
+        "$HOME/Development"
     )
 
     # Gather all directories

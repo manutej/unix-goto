@@ -9,9 +9,9 @@ This guide shows you how to set up configuration-based bookmarks so your team ca
 ## 🎯 What This Solves
 
 **Problem:** Different developers have different directory structures:
-- Developer A: `~/work/projects/GAI-3101`
-- Developer B: `~/code/clients/GAI-3101`
-- Developer C: `~/Documents/LUXOR/PROJECTS/GAI-3101`
+- Developer A: `~/work/projects/client-alpha`
+- Developer B: `~/code/clients/client-alpha`
+- Developer C: `~/work/projects/client-alpha`
 
 **Solution:** Each developer configures their workspace paths once, then `bookmark sync` automatically creates all the bookmarks they need.
 
@@ -36,7 +36,7 @@ vim ~/.goto_config
 Example configuration:
 ```bash
 # My workspaces
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ~/work/clients
 ~/code/personal
 ```
@@ -55,19 +55,19 @@ That's it! All subdirectories are now bookmarked automatically.
 
 ### Your Directory Structure
 ```
-~/Documents/LUXOR/PROJECTS/
-├── GAI-3101/
+~/work/projects/
+├── client-alpha/
 │   ├── docs/
 │   └── src/
-├── HALCON/
+├── project-beta/
 │   └── config/
-└── WA3590/
+└── internal-tool/
 ```
 
 ### Your Configuration
 ```bash
 # ~/.goto_config
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ```
 
 ### Run Sync
@@ -77,13 +77,13 @@ $ bookmark sync
 🔄 Syncing bookmarks from config...
 
 Found 1 workspace path(s):
-  • /Users/you/Documents/LUXOR/PROJECTS
+  • /Users/you/work/projects
 
-Scanning: /Users/you/Documents/LUXOR/PROJECTS
-  ✓ Added: projects → /Users/you/Documents/LUXOR/PROJECTS
-  ✓ Added: gai-3101 → /Users/you/Documents/LUXOR/PROJECTS/GAI-3101
-  ✓ Added: halcon → /Users/you/Documents/LUXOR/PROJECTS/HALCON
-  ✓ Added: wa3590 → /Users/you/Documents/LUXOR/PROJECTS/WA3590
+Scanning: /Users/you/work/projects
+  ✓ Added: projects → /Users/you/work/projects
+  ✓ Added: client-alpha → /Users/you/work/projects/client-alpha
+  ✓ Added: project-beta → /Users/you/work/projects/project-beta
+  ✓ Added: internal-tool → /Users/you/work/projects/internal-tool
 
 === Sync Summary ===
 Added:   4 bookmarks
@@ -96,14 +96,14 @@ Skipped: 0 bookmarks (unchanged)
 
 ### Use Your Bookmarks
 ```bash
-goto @gai-3101           # Navigate to GAI-3101
-goto @halcon             # Navigate to HALCON
-goto @wa3590             # Navigate to WA3590
-goto @projects           # Navigate to PROJECTS root
+goto @client-alpha           # Navigate to client-alpha
+goto @project-beta             # Navigate to project-beta
+goto @internal-tool             # Navigate to internal-tool
+goto @projects           # Navigate to projects root
 
 # With fuzzy matching:
-goto @gai                # Matches @gai-3101
-goto @hal                # Matches @halcon
+goto @gai                # Matches @client-alpha
+goto @hal                # Matches @project-beta
 ```
 
 ---
@@ -111,7 +111,7 @@ goto @hal                # Matches @halcon
 ## 🔄 How It Works
 
 ### Bookmark Naming
-- **Automatic lowercase conversion:** `GAI-3101` → `@gai-3101`
+- **Automatic lowercase conversion:** `client-alpha` → `@client-alpha`
 - **Consistent naming:** All bookmarks are lowercase for easy typing
 - **No duplicates:** Existing bookmarks won't be overwritten
 
@@ -173,7 +173,7 @@ You can configure multiple workspace directories:
 
 ```bash
 # ~/.goto_config
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ~/work/clients
 ~/code/personal
 ~/Development/experiments
@@ -198,7 +198,7 @@ Add paths that might not exist on all machines:
 
 ```bash
 # ~/.goto_config
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ~/work/clients              # Might not exist on all machines
 /Volumes/ExternalDrive/code # Only on some setups
 ```
@@ -251,24 +251,24 @@ bookmark sync
 ### Use Case 3: Deep Workspace
 ```bash
 # ~/.goto_config
-~/Documents/LUXOR
-~/Documents/LUXOR/PROJECTS
-~/Documents/LUXOR/ARCHIVES
+~/work
+~/work/projects
+~/work/ARCHIVES
 
 # Creates hierarchical bookmarks:
 # @luxor (root)
 # @projects, @archives (first level)
-# @gai-3101, @halcon (project subdirs)
+# @client-alpha, @project-beta (project subdirs)
 ```
 
 ### Use Case 4: Multiple Machines
 ```bash
 # ~/.goto_config on Laptop
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ~/code/personal
 
 # ~/.goto_config on Desktop
-/Volumes/Work/LUXOR/PROJECTS
+/Volumes/Work/work/projects
 ~/Desktop/code
 
 # Same tool, different paths, bookmark sync adapts!
@@ -298,7 +298,7 @@ bookmark sync
 
 ### Bookmark name conflicts
 - Sync uses lowercase names
-- If `GAI-3101` and `gai-other` both exist, second one wins
+- If `client-alpha` and `gai-other` both exist, second one wins
 - Rename directories to avoid conflicts
 
 ### Want to start fresh
@@ -321,7 +321,7 @@ bookmark sync
 # Empty lines are ignored
 # One path per line
 
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ~/work/clients
 ```
 
@@ -337,8 +337,8 @@ bookmark sync
 # Generated: 2025-11-12
 
 # Main projects
-~/Documents/LUXOR/PROJECTS
-~/Documents/LUXOR/ARCHIVES
+~/work/projects
+~/work/ARCHIVES
 
 # Client work
 ~/work/active-clients
@@ -426,7 +426,7 @@ When you find a good workspace structure, update `.goto_config.example` for your
 - ✅ Shareable with team (template-based)
 - ✅ Survives git updates (user config is gitignored)
 - ✅ Easy to maintain (just `bookmark sync`)
-- ✅ Works with fuzzy matching (`goto @gai` → `@gai-3101`)
+- ✅ Works with fuzzy matching (`goto @gai` → `@client-alpha`)
 
 **Configuration file:**
 - Template: `.goto_config.example` (in repo, shared)

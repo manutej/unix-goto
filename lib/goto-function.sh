@@ -115,30 +115,25 @@ goto() {
             glow "$HOME/.bashrc" 2>/dev/null || cat "$HOME/.bashrc"
             return
             ;;
-        luxor)
-            __goto_navigate_to "$HOME/Documents/LUXOR"
-            return
-            ;;
-        halcon)
-            __goto_navigate_to "$HOME/Documents/LUXOR/PROJECTS/HALCON"
-            return
-            ;;
-        docs)
-            __goto_navigate_to "$HOME/ASCIIDocs"
-            return
-            ;;
-        infra)
-            __goto_navigate_to "$HOME/ASCIIDocs/infra"
-            return
-            ;;
+        # Add your custom shortcuts here
+        # Example:
+        # work)
+        #     __goto_navigate_to "$HOME/work/projects"
+        #     return
+        #     ;;
+        # personal)
+        #     __goto_navigate_to "$HOME/code/personal"
+        #     return
+        #     ;;
     esac
 
     # Search paths for direct folder matching
-    # Customize these paths for your environment
+    # IMPORTANT: Customize these paths for your environment!
+    # These are example paths - replace with your actual workspace directories
     local search_paths=(
-        "$HOME/ASCIIDocs"
-        "$HOME/Documents/LUXOR"
-        "$HOME/Documents/LUXOR/PROJECTS"
+        "$HOME/work/projects"
+        "$HOME/code"
+        "$HOME/Development"
     )
 
     # Check if input contains path separators (multi-level navigation)

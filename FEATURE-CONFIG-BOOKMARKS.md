@@ -32,7 +32,7 @@ A configuration-based bookmark system that:
 # Copy this file to ~/.goto_config and customize
 
 # Your workspace directories:
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ~/work/clients
 ~/code/personal
 ```
@@ -43,7 +43,7 @@ A configuration-based bookmark system that:
 Each developer creates their own config with their local paths:
 ```bash
 # Developer A
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 
 # Developer B
 ~/work/company-projects
@@ -64,8 +64,8 @@ Automatically creates lowercase bookmarks for:
 **Navigation:** `goto @projectname`
 
 Works with:
-- Direct navigation: `goto @gai-3101`
-- Fuzzy matching: `goto @gai` → `@gai-3101`
+- Direct navigation: `goto @client-alpha`
+- Fuzzy matching: `goto @gai` → `@client-alpha`
 - Tab completion: `goto @<TAB>`
 
 ---
@@ -74,10 +74,10 @@ Works with:
 
 ### Your Setup
 ```
-~/Documents/LUXOR/PROJECTS/
-├── GAI-3101/
-├── HALCON/
-├── WA3590/
+~/work/projects/
+├── client-alpha/
+├── project-beta/
+├── internal-tool/
 └── .git/  (hidden, skipped)
 ```
 
@@ -87,7 +87,7 @@ Works with:
 $ cp .goto_config.example ~/.goto_config
 
 # Edit with your path
-$ echo "~/Documents/LUXOR/PROJECTS" >> ~/.goto_config
+$ echo "~/work/projects" >> ~/.goto_config
 
 # Sync bookmarks
 $ bookmark sync
@@ -95,13 +95,13 @@ $ bookmark sync
 🔄 Syncing bookmarks from config...
 
 Found 1 workspace path(s):
-  • /Users/you/Documents/LUXOR/PROJECTS
+  • /Users/you/work/projects
 
-Scanning: /Users/you/Documents/LUXOR/PROJECTS
-  ✓ Added: projects → /Users/you/Documents/LUXOR/PROJECTS
-  ✓ Added: gai-3101 → /Users/you/Documents/LUXOR/PROJECTS/GAI-3101
-  ✓ Added: halcon → /Users/you/Documents/LUXOR/PROJECTS/HALCON
-  ✓ Added: wa3590 → /Users/you/Documents/LUXOR/PROJECTS/WA3590
+Scanning: /Users/you/work/projects
+  ✓ Added: projects → /Users/you/work/projects
+  ✓ Added: client-alpha → /Users/you/work/projects/client-alpha
+  ✓ Added: project-beta → /Users/you/work/projects/project-beta
+  ✓ Added: internal-tool → /Users/you/work/projects/internal-tool
 
 === Sync Summary ===
 Added:   4 bookmarks
@@ -113,16 +113,16 @@ Skipped: 0 bookmarks (unchanged)
 
 ### Navigation
 ```bash
-$ goto @gai-3101
-→ /Users/you/Documents/LUXOR/PROJECTS/GAI-3101
+$ goto @client-alpha
+→ /Users/you/work/projects/client-alpha
 
 $ goto @projects
-→ /Users/you/Documents/LUXOR/PROJECTS
+→ /Users/you/work/projects
 
 # With fuzzy matching
 $ goto @gai
-✓ Fuzzy match: @gai → @gai-3101
-→ /Users/you/Documents/LUXOR/PROJECTS/GAI-3101
+✓ Fuzzy match: @gai → @client-alpha
+→ /Users/you/work/projects/client-alpha
 ```
 
 ---
@@ -252,8 +252,8 @@ name|/absolute/path|timestamp|sync
 
 **Examples:**
 ```
-projects|/Users/you/Documents/LUXOR/PROJECTS|1699876543|sync
-gai-3101|/Users/you/Documents/LUXOR/PROJECTS/GAI-3101|1699876543|sync
+projects|/Users/you/work/projects|1699876543|sync
+client-alpha|/Users/you/work/projects/client-alpha|1699876543|sync
 work|/Users/you/work|1699876500|manual
 ```
 
@@ -280,8 +280,8 @@ work|/Users/you/work|1699876500|manual
 
 **Lowercase Conversion:**
 ```
-GAI-3101    → gai-3101
-HALCON      → halcon
+client-alpha    → client-alpha
+project-beta      → project-beta
 MyProject   → myproject
 Work_Stuff  → work_stuff
 ```
@@ -348,13 +348,13 @@ Work_Stuff  → work_stuff
 **Laptop:**
 ```bash
 # ~/.goto_config
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 ```
 
 **Desktop:**
 ```bash
 # ~/.goto_config
-/Volumes/ExternalDrive/LUXOR/PROJECTS
+/Volumes/ExternalDrive/work/projects
 ```
 
 **Result:** Same bookmarks, different physical locations.
@@ -398,14 +398,14 @@ Work_Stuff  → work_stuff
 ```bash
 # ~/.goto_config
 $HOME/workspace
-$PROJECTS_DIR/active
+$projects_DIR/active
 ${WORK_ROOT}/clients
 ```
 
 ### Conditional Paths
 ```bash
 # ~/.goto_config
-~/Documents/LUXOR/PROJECTS   # Always exists
+~/work/projects   # Always exists
 ~/work/clients               # May not exist on all machines
 /Volumes/Backup/archive      # External drive (optional)
 ```
@@ -413,7 +413,7 @@ ${WORK_ROOT}/clients
 Sync shows warnings but continues:
 ```
 Found 2 workspace path(s):
-  • /Users/you/Documents/LUXOR/PROJECTS
+  • /Users/you/work/projects
   • /Users/you/work/clients
 ⚠️  Skipping non-existent path: /Volumes/Backup/archive
 ```
@@ -421,7 +421,7 @@ Found 2 workspace path(s):
 ### Re-syncing
 ```bash
 # Add new projects to your workspace
-mkdir ~/Documents/LUXOR/PROJECTS/NewProject
+mkdir ~/work/projects/NewProject
 
 # Re-sync to pick up new directories
 bookmark sync
@@ -438,16 +438,16 @@ Skipped: 4 bookmarks (unchanged)
 
 ### Works with Fuzzy Matching
 ```bash
-# Config creates: @gai-3101
-goto @gai        # Fuzzy matches to @gai-3101
-goto @hal        # Fuzzy matches to @halcon
+# Config creates: @client-alpha
+goto @gai        # Fuzzy matches to @client-alpha
+goto @hal        # Fuzzy matches to @project-beta
 goto @proj       # Shows multiple matches if ambiguous
 ```
 
 ### Works with Tab Completion
 ```bash
 goto @<TAB>      # Shows all bookmarks (manual + synced)
-goto @gai<TAB>   # Completes to @gai-3101
+goto @gai<TAB>   # Completes to @client-alpha
 ```
 
 ### Works with Manual Bookmarks
@@ -462,7 +462,7 @@ bookmark sync    # From ~/.goto_config
 # Both types work together
 bookmark list    # Shows all bookmarks
 goto @home       # Manual bookmark
-goto @gai-3101   # Synced bookmark
+goto @client-alpha   # Synced bookmark
 ```
 
 ---
@@ -503,7 +503,7 @@ ${WORKSPACE}/active
 # =========================
 
 # Main client work
-~/Documents/LUXOR/PROJECTS
+~/work/projects
 
 # Internal tools
 ~/work/company/tools
@@ -566,16 +566,16 @@ ${WORKSPACE}/active
 
 **Before:**
 ```bash
-bookmark add gai-3101 ~/Documents/LUXOR/PROJECTS/GAI-3101
-bookmark add halcon ~/Documents/LUXOR/PROJECTS/HALCON
-bookmark add wa3590 ~/Documents/LUXOR/PROJECTS/WA3590
+bookmark add client-alpha ~/work/projects/client-alpha
+bookmark add project-beta ~/work/projects/project-beta
+bookmark add internal-tool ~/work/projects/internal-tool
 # ... repeat for every new project
 ```
 
 **After:**
 ```bash
 # One-time setup
-echo "~/Documents/LUXOR/PROJECTS" > ~/.goto_config
+echo "~/work/projects" > ~/.goto_config
 
 # Auto-generates all bookmarks
 bookmark sync
@@ -597,7 +597,7 @@ bookmark add downloads ~/Downloads
 bookmark add desktop ~/Desktop
 
 # Both types work identically
-goto @gai-3101    # Synced
+goto @client-alpha    # Synced
 goto @tmp         # Manual
 ```
 
