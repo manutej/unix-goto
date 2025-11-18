@@ -60,8 +60,42 @@ EOF
     cat "$REPO_DIR/lib/list-command.sh" >> "$SHELL_CONFIG"
     echo "" >> "$SHELL_CONFIG"
 
+    echo "# Fuzzy matching" >> "$SHELL_CONFIG"
+    cat "$REPO_DIR/lib/fuzzy-matching.sh" >> "$SHELL_CONFIG"
+    echo "" >> "$SHELL_CONFIG"
+
     echo "# Main goto function" >> "$SHELL_CONFIG"
     cat "$REPO_DIR/lib/goto-function.sh" >> "$SHELL_CONFIG"
+fi
+
+# Install completions
+echo "📝 Installing shell completions..."
+
+if [ -n "$ZSH_VERSION" ]; then
+    # Zsh completion
+    COMP_DIR="${ZDOTDIR:-$HOME}/.zsh/completions"
+    mkdir -p "$COMP_DIR"
+    cp "$REPO_DIR/completions/goto-completion.zsh" "$COMP_DIR/_goto"
+
+    # Add to fpath if not already there
+    if ! grep -q "fpath.*goto" "$SHELL_CONFIG" 2>/dev/null; then
+        echo "fpath=($COMP_DIR \$fpath)" >> "$SHELL_CONFIG"
+        echo "autoload -Uz compinit && compinit" >> "$SHELL_CONFIG"
+    fi
+    echo "✅ Zsh completions installed to $COMP_DIR"
+elif [ -n "$BASH_VERSION" ]; then
+    # Bash completion
+    COMP_DIR="$HOME/.bash_completions"
+    mkdir -p "$COMP_DIR"
+    cp "$REPO_DIR/completions/goto-completion.bash" "$COMP_DIR/goto"
+
+    # Source in bashrc if not already there
+    if ! grep -q "goto.*completion" "$SHELL_CONFIG" 2>/dev/null; then
+        echo "source $COMP_DIR/goto" >> "$SHELL_CONFIG"
+    fi
+    echo "✅ Bash completions installed to $COMP_DIR"
+else
+    echo "⚠️  Could not detect shell for completions"
 fi
 
 # Verify Claude CLI is available

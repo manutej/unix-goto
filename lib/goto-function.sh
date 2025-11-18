@@ -12,7 +12,7 @@ __goto_navigate_to() {
     fi
 
     # Navigate
-    cd "$target_dir"
+    cd "$target_dir" || return 1
 
     # Track in history
     if command -v __goto_track &> /dev/null; then
@@ -95,7 +95,7 @@ goto() {
             return
             ;;
         "~")
-            cd "$HOME"
+            cd "$HOME" || return 1
             echo "→ $HOME"
             return
             ;;
@@ -115,30 +115,25 @@ goto() {
             glow "$HOME/.bashrc" 2>/dev/null || cat "$HOME/.bashrc"
             return
             ;;
-        luxor)
-            __goto_navigate_to "$HOME/Documents/LUXOR"
-            return
-            ;;
-        halcon)
-            __goto_navigate_to "$HOME/Documents/LUXOR/PROJECTS/HALCON"
-            return
-            ;;
-        docs)
-            __goto_navigate_to "$HOME/ASCIIDocs"
-            return
-            ;;
-        infra)
-            __goto_navigate_to "$HOME/ASCIIDocs/infra"
-            return
-            ;;
+        # Add your custom shortcuts here
+        # Example:
+        # work)
+        #     __goto_navigate_to "$HOME/work/projects"
+        #     return
+        #     ;;
+        # personal)
+        #     __goto_navigate_to "$HOME/code/personal"
+        #     return
+        #     ;;
     esac
 
     # Search paths for direct folder matching
-    # Customize these paths for your environment
+    # IMPORTANT: Customize these paths for your environment!
+    # These are example paths - replace with your actual workspace directories
     local search_paths=(
-        "$HOME/ASCIIDocs"
-        "$HOME/Documents/LUXOR"
-        "$HOME/Documents/LUXOR/PROJECTS"
+        "$HOME/work/projects"
+        "$HOME/code"
+        "$HOME/Development"
     )
 
     # Check if input contains path separators (multi-level navigation)
@@ -162,9 +157,46 @@ goto() {
             fi
         done
 
-        # Base segment not found
+        # Base segment not found - try fuzzy matching
+        if command -v __goto_fuzzy_get_dirs &> /dev/null; then
+            # Get all directories
+            local -a all_dirs=()
+            while IFS= read -r dir; do
+                [ -n "$dir" ] && all_dirs+=("$dir")
+            done < <(__goto_fuzzy_get_dirs)
+
+            # Fuzzy match the base segment
+            local -a matches=()
+            while IFS= read -r match; do
+                [ -n "$match" ] && matches+=("$match")
+            done < <(__goto_fuzzy_match "$base_segment" "${all_dirs[@]}")
+
+            if [ ${#matches[@]} -eq 1 ]; then
+                # Single fuzzy match found
+                local matched_base="${matches[0]}"
+                echo "✓ Fuzzy match: $base_segment → $matched_base"
+
+                # Try to navigate to the full path
+                for base_path in "${search_paths[@]}"; do
+                    local full_path="$base_path/$matched_base/$rest_path"
+                    if [ -d "$full_path" ]; then
+                        __goto_navigate_to "$full_path"
+                        return 0
+                    fi
+                done
+
+                echo "❌ '$matched_base' found, but '$rest_path' doesn't exist within it"
+                return 1
+            elif [ ${#matches[@]} -gt 1 ]; then
+                echo "❌ Multiple matches for base '$base_segment': ${matches[*]:0:5}"
+                echo "Be more specific"
+                return 1
+            fi
+        fi
+
+        # No exact or fuzzy match found
         echo "❌ Base folder not found: $base_segment"
-        echo "Try 'goto list --folders' to see available folders"
+        echo "Try 'goto list' to see available directories"
         return 1
     fi
 
@@ -178,7 +210,16 @@ goto() {
         fi
     done
 
-    # If not found at root level, search recursively for unique folder names
+    # If not found at root level, try fuzzy matching first
+    if command -v __goto_fuzzy_search &> /dev/null; then
+        echo "🔍 No exact match, trying fuzzy search..."
+        __goto_fuzzy_search "$1"
+        local fuzzy_result=$?
+        [ $fuzzy_result -eq 0 ] && return 0
+        # If fuzzy returned error code 1 (no match or ambiguous), continue to recursive search
+    fi
+
+    # If fuzzy didn't work, search recursively for unique folder names
     # This allows: goto unix-goto (finds LUXOR/Git_Repos/unix-goto)
     echo "🔍 Searching in subdirectories..."
 

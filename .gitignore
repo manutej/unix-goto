@@ -34,3 +34,4 @@ test/
 # Local configuration
 .env
 .config.local
+.goto_config
