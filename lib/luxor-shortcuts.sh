@@ -226,6 +226,36 @@ __goto_hardcoded_luxor_shortcut() {
             echo "$HOME/Documents/LUXOR/Git_Repos/Luxor-app"
             return 0
             ;;
+        # CETI - Coordinated Exploration and Technology Integration
+        ceti)
+            echo "$HOME/Documents/CETI"
+            return 0
+            ;;
+        # CETI Sub-Projects
+        ceti-coding|coding-projects|ceti-code)
+            echo "$HOME/Documents/CETI/CODING_PROJECTS"
+            return 0
+            ;;
+        ceti-esoterism|esoterism|esoteric)
+            echo "$HOME/Documents/CETI/ESOTERISM"
+            return 0
+            ;;
+        ceti-finance|finance|fin|ceti-fin)
+            echo "$HOME/Documents/CETI/fin"
+            return 0
+            ;;
+        ceti-brand|brand)
+            echo "$HOME/Documents/CETI/BRAND"
+            return 0
+            ;;
+        ceti-realestate|real-estate|realestate|ceti-real)
+            echo "$HOME/Documents/CETI/real-estate"
+            return 0
+            ;;
+        ceti-smartcontracts|smart-contracts|smartcontracts|ceti-smart)
+            echo "$HOME/Documents/CETI/smart-contracts"
+            return 0
+            ;;
         *)
             return 1
             ;;
